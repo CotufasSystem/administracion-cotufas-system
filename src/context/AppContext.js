@@ -6,15 +6,15 @@ import { capitalize, getLocalDateString } from '../utils/formatters';
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const [employees, setEmployees] = useState(initialEmployees);
-  const [projects, setProjects] = useState(initialProjects);
+  const [employees, setEmployees] = useState(initialEmployees || []);
+  const [projects, setProjects] = useState(initialProjects || []);
   const [attendance, setAttendance] = useState({});
   const [payrollPayments, setPayrollPayments] = useState([]);
   const [extraIncomes, setExtraIncomes] = useState([]);
   const [debts, setDebts] = useState([]);
   const [agenda, setAgenda] = useState([]);
   const [negotiations, setNegotiations] = useState([]);
-  const [rules, setRules] = useState(initialRules);
+  const [rules, setRules] = useState(initialRules || []);
   const [profileImage, setProfileImage] = useState(null);
   const [themeMode, setThemeMode] = useState('light');
   const [projectRestaurants, setProjectRestaurants] = useState({});

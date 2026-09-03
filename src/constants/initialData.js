@@ -1,4 +1,4 @@
-﻿export const INITIAL_EMPLOYEES = [
+export const INITIAL_EMPLOYEES = [
   { id: 'emp-1', name: 'Alejandro', salary: 300, binance: '', area: 'Operaciones', projectIds: ['proj-1'], schedule: '9:00 AM - 5:00 PM', advances: 0 },
   { id: 'emp-2', name: 'Angel', salary: 300, binance: '', area: 'Operaciones', projectIds: ['proj-1'], schedule: '9:00 AM - 5:00 PM', advances: 0 },
   { id: 'emp-3', name: 'Cesar', salary: 300, binance: '', area: 'Operaciones', projectIds: ['proj-2'], schedule: '9:00 AM - 5:00 PM', advances: 0 },
@@ -37,3 +37,7 @@ export const INITIAL_RULES = [
 ];
 
 export const DEFAULT_PIN = '123456';
+
+export const initialEmployees = INITIAL_EMPLOYEES;
+export const initialProjects = INITIAL_PROJECTS;
+export const initialRules = INITIAL_RULES;

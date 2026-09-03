@@ -1,5 +1,6 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ScrollView, Platform, Alert } from 'react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { ModalWrapper } from '../common/UIComponents';
 import { getLocalDateString } from '../../utils/formatters';
 import { useApp } from '../../context/AppContext';
@@ -7,20 +8,41 @@ import { EmployeePortalAuthView } from './EmployeePortalAuthView';
 import { EmployeePortalDetailView } from './EmployeePortalDetailView';
 
 export const EmployeePortalModal = ({ visible, onClose }) => {
-  const { employees, attendance, notifySelfAttendance, payrollPayments } = useApp();
-  const activeEmployees = useMemo(() => employees.filter((e) => e.status !== 'inactive'), [employees]);
+  const { employees = [], attendance = {}, notifySelfAttendance, payrollPayments = [] } = useApp() || {};
+  const activeEmployees = useMemo(
+    () => (employees || []).filter((e) => e?.status !== 'inactive' && !e?.exemptAttendance && !e?.isOwner),
+    [employees]
+  );
 
   const [selectedEmpId, setSelectedEmpId] = useState('');
   const [authenticatedEmpId, setAuthenticatedEmpId] = useState(null);
+  const [supportsBiometrics, setSupportsBiometrics] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const authenticatedEmployee = activeEmployees.find((e) => e.id === authenticatedEmpId);
-  const targetEmployee = activeEmployees.find((e) => e.id === selectedEmpId);
+  // Detect genuine biometric hardware support on mobile devices only
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS !== 'web') {
+        try {
+          const hasHardware = await LocalAuthentication.hasHardwareAsync();
+          const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+          setSupportsBiometrics(hasHardware && isEnrolled);
+        } catch (e) {
+          setSupportsBiometrics(false);
+        }
+      } else {
+        setSupportsBiometrics(false);
+      }
+    })();
+  }, []);
+
+  const authenticatedEmployee = (activeEmployees || []).find((e) => e.id === authenticatedEmpId);
+  const targetEmployee = (activeEmployees || []).find((e) => e.id === selectedEmpId);
 
   const todayStr = getLocalDateString(new Date());
-  const todayRecord = attendance[todayStr]?.[authenticatedEmployee?.id];
+  const todayRecord = (attendance || {})[todayStr]?.[authenticatedEmployee?.id];
 
   const isPending = typeof todayRecord === 'object' && todayRecord?.pendingValidation;
   const isPresent = (typeof todayRecord === 'string' && todayRecord === 'present') || (typeof todayRecord === 'object' && todayRecord?.status === 'present' && !todayRecord?.pendingValidation);
@@ -52,12 +74,32 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
       setAuthError('Selecciona tu nombre primero');
       return;
     }
+    if (Platform.OS === 'web' || !supportsBiometrics) {
+      setAuthError('La autenticación biométrica solo está disponible en dispositivos móviles compatibles.');
+      return;
+    }
+
     setAuthError('');
     setIsScanning(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setIsScanning(false);
-    setAuthenticatedEmpId(targetEmployee.id);
-    setPinInput('');
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: `Autenticación de ${targetEmployee.name}`,
+        cancelLabel: 'Cancelar',
+        fallbackLabel: 'Usar Cédula / PIN',
+        disableDeviceFallback: false,
+      });
+
+      if (result.success) {
+        setAuthenticatedEmpId(targetEmployee.id);
+        setPinInput('');
+      } else {
+        setAuthError('Autenticación biométrica no completada.');
+      }
+    } catch (e) {
+      setAuthError('Error al leer el sensor biométrico del dispositivo.');
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const handlePinOrCiAuth = () => {
@@ -68,8 +110,19 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
     const cleanInput = pinInput.trim().toLowerCase().replace(/[^0-9a-z]/g, '');
     const cleanCi = (targetEmployee.idCard || '').trim().toLowerCase().replace(/[^0-9a-z]/g, '');
     const cleanPhone = (targetEmployee.phone || '').trim().replace(/[^0-9]/g, '').slice(-4);
+    const customPin = (targetEmployee.pin || '').trim().toLowerCase();
 
-    if (cleanInput && (cleanInput === cleanCi || cleanInput === cleanPhone || cleanInput === '1234' || cleanInput === targetEmployee.pin)) {
+    if (!cleanInput) {
+      setAuthError('Por favor ingresa tu número de Cédula o PIN.');
+      return;
+    }
+
+    const isValid = (cleanCi && cleanInput === cleanCi) ||
+                    (customPin && cleanInput === customPin) ||
+                    (cleanPhone && cleanInput === cleanPhone) ||
+                    cleanInput === '1234';
+
+    if (isValid) {
       setAuthenticatedEmpId(targetEmployee.id);
       setPinInput('');
       setAuthError('');
@@ -108,6 +161,7 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
             activeEmployees={activeEmployees}
             selectedEmpId={selectedEmpId}
             onSelectEmp={(id) => { setSelectedEmpId(id); setAuthError(''); }}
+            supportsBiometrics={supportsBiometrics}
             onBiometricAuth={handleBiometricAuth}
             isScanning={isScanning}
             pinInput={pinInput}
