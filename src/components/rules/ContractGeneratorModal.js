@@ -5,6 +5,7 @@ import { THEME } from '../../constants/theme';
 import { ModalWrapper } from '../common/UIComponents';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { useApp } from '../../context/AppContext';
+import { COTUFAS_LOGO_DATA_URL } from '../../constants/logoDataUri';
 
 export const ContractGeneratorModal = ({ visible, onClose, employees = [] }) => {
   const { profileImage } = useApp();
@@ -25,7 +26,8 @@ export const ContractGeneratorModal = ({ visible, onClose, employees = [] }) => 
   };
 
   const handlePrintContract = () => {
-    const logoHtml = profileImage ? `<img src="${profileImage}" alt="Logo" style="max-height: 50px; max-width: 140px; object-fit: contain; margin-bottom: 6px; display: block; margin-left: auto; margin-right: auto;" />` : '';
+    const effectiveLogo = profileImage || COTUFAS_LOGO_DATA_URL;
+    const logoHtml = effectiveLogo ? `<img src="${effectiveLogo}" alt="Logo" style="max-height: 50px; max-width: 140px; object-fit: contain; margin-bottom: 6px; display: block; margin-left: auto; margin-right: auto;" />` : '';
     const html = `
 <!DOCTYPE html>
 <html lang="es">

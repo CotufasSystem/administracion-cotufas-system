@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../constants/theme';
@@ -98,7 +98,7 @@ export const SettingsScreen = () => {
             <Text style={styles.descText}>Toca el icono de la cámara para subir un nuevo logo o foto desde tus archivos.</Text>
             <TouchableOpacity style={styles.resetLogoBtn} onPress={resetProfileImage} activeOpacity={0.7}>
               <Ionicons name="refresh-outline" size={13} color={THEME.colors.primary} />
-              <Text style={styles.resetLogoText}>Restablecer logo original 🍿</Text>
+              <Text style={styles.resetLogoText}>Restablecer logotipo oficial</Text>
             </TouchableOpacity>
           </View>
         </View>

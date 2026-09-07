@@ -25,3 +25,12 @@ targets.forEach((targetDir) => {
 });
 
 console.log('Successfully aligned font asset paths for web production.');
+
+// Ensure favicon & logo in dist root
+const iconSrc = path.join(__dirname, '..', 'assets', 'favicon.png');
+const distDir = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(iconSrc) && fs.existsSync(distDir)) {
+  fs.copyFileSync(iconSrc, path.join(distDir, 'favicon.ico'));
+  fs.copyFileSync(iconSrc, path.join(distDir, 'favicon.png'));
+  console.log('Copied favicon to dist root.');
+}

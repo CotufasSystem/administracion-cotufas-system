@@ -54,7 +54,7 @@ export const AuthScreen = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.brandBox}>
-          <ProfileAvatar size={64} showBadge={false} />
+          <ProfileAvatar size={72} showBadge={false} />
           <Text style={styles.title}>Cotufas System</Text>
           <Text style={styles.subtitle}>Acceso Administrador (PIN de 6 dígitos)</Text>
         </View>

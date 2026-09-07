@@ -1,4 +1,5 @@
 import { formatCurrency, formatDate } from './formatters';
+import { COTUFAS_LOGO_DATA_URL } from '../constants/logoDataUri';
 
 export const printFinanceStatementPdf = ({
   profileImage,
@@ -14,7 +15,8 @@ export const printFinanceStatementPdf = ({
 }) => {
   const netFlow = grandTotalIncome - grandTotalExpenses;
   const nowStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  const logoHtml = profileImage ? `<img src="${profileImage}" alt="Logo" style="max-height: 46px; max-width: 120px; object-fit: contain;" />` : '';
+  const effectiveLogo = profileImage || COTUFAS_LOGO_DATA_URL;
+  const logoHtml = effectiveLogo ? `<img src="${effectiveLogo}" alt="Logo" style="max-height: 46px; max-width: 120px; object-fit: contain;" />` : '';
 
   const html = `
 <!DOCTYPE html>

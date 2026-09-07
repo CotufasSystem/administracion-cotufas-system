@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
+import { ProfileAvatar } from '../common/ProfileAvatar';
 
 export const EmployeePortalAuthView = ({
   activeEmployees = [],
@@ -41,7 +42,7 @@ export const EmployeePortalAuthView = ({
   return (
     <View style={styles.authBox}>
       <View style={styles.lockBadge}>
-        <Ionicons name={supportsBiometrics ? "finger-print" : "shield-checkmark"} size={36} color={THEME.colors.primary} />
+        <ProfileAvatar size={62} showBadge={false} />
       </View>
       <Text style={styles.authTitle}>
         {supportsBiometrics ? "Acceso Biométrico / Privado" : "Acceso Seguro del Colaborador"}

@@ -1,8 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
+import { COTUFAS_LOGO } from '../../constants/assets';
 
 export const ProfileAvatar = ({ size = 42, showBadge = true, onPressCustom = null }) => {
   const { profileImage, updateProfileImage, resetProfileImage } = useApp();
@@ -24,8 +25,8 @@ export const ProfileAvatar = ({ size = 42, showBadge = true, onPressCustom = nul
       };
       input.click();
     } else {
-      Alert.alert('Foto de Perfil', 'Selecciona una opción', [
-        { text: 'Restablecer Icono 🍿', onPress: resetProfileImage },
+      Alert.alert('Logotipo de la Empresa', 'Selecciona una opción', [
+        { text: 'Restablecer Logotipo Oficial', onPress: resetProfileImage },
         { text: 'Cancelar', style: 'cancel' },
       ]);
     }
@@ -39,11 +40,11 @@ export const ProfileAvatar = ({ size = 42, showBadge = true, onPressCustom = nul
   const handleLongPress = () => {
     if (profileImage) {
       if (Platform.OS === 'web') {
-        if (window.confirm('¿Deseas restablecer la foto de perfil al icono original 🍿?')) {
+        if (window.confirm('¿Deseas restablecer el logotipo al diseño oficial de Cotufas System?')) {
           resetProfileImage();
         }
       } else {
-        Alert.alert('Restablecer', '¿Restablecer al icono 🍿?', [
+        Alert.alert('Restablecer', '¿Restablecer al logotipo oficial de Cotufas System?', [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Restablecer', onPress: resetProfileImage },
         ]);
@@ -59,17 +60,11 @@ export const ProfileAvatar = ({ size = 42, showBadge = true, onPressCustom = nul
       activeOpacity={0.8}
       title={onPressCustom ? "Haz clic para abrir/cerrar barra lateral" : "Haz clic para cambiar foto"}
     >
-      {profileImage ? (
-        <Image
-          source={{ uri: profileImage }}
-          style={[styles.image, { width: size - 4, height: size - 4, borderRadius: (size - 4) / 2 }]}
-          resizeMode="contain"
-        />
-      ) : (
-        <View style={[styles.defaultBox, { width: size - 4, height: size - 4, borderRadius: (size - 4) / 2 }]}>
-          <Text style={[styles.defaultEmoji, { fontSize: size * 0.5 }]}>🍿</Text>
-        </View>
-      )}
+      <Image
+        source={profileImage ? { uri: profileImage } : COTUFAS_LOGO}
+        style={[styles.image, { width: size - 4, height: size - 4, borderRadius: (size - 4) / 2 }]}
+        resizeMode="contain"
+      />
 
       {showBadge && (
         <TouchableOpacity

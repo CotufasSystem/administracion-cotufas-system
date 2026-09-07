@@ -5,6 +5,7 @@ import { THEME } from '../../constants/theme';
 import { ModalWrapper } from '../common/UIComponents';
 import { formatCurrency } from '../../utils/formatters';
 import { useApp } from '../../context/AppContext';
+import { COTUFAS_LOGO_DATA_URL } from '../../constants/logoDataUri';
 
 export const ProposalGeneratorModal = ({ visible, onClose }) => {
   const { profileImage } = useApp();
@@ -33,7 +34,8 @@ export const ProposalGeneratorModal = ({ visible, onClose }) => {
 
   const handlePrintProposal = () => {
     const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
-    const logoHtml = profileImage ? `<img src="${profileImage}" alt="Logo" style="max-height: 48px; max-width: 120px; object-fit: contain;" />` : '';
+    const effectiveLogo = profileImage || COTUFAS_LOGO_DATA_URL;
+    const logoHtml = effectiveLogo ? `<img src="${effectiveLogo}" alt="Logo" style="max-height: 48px; max-width: 120px; object-fit: contain;" />` : '';
     const html = `
 <!DOCTYPE html>
 <html lang="es">

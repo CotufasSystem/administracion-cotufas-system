@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../constants/theme';
@@ -8,6 +8,7 @@ import { ContractGeneratorModal } from '../components/rules/ContractGeneratorMod
 import { ProposalGeneratorModal } from '../components/rules/ProposalGeneratorModal';
 import { PinConfirmModal } from '../components/common/PinConfirmModal';
 import { useApp } from '../context/AppContext';
+import { COTUFAS_LOGO_DATA_URL } from '../constants/logoDataUri';
 
 export const RulesScreen = () => {
   const { rules, employees, saveRule, deleteRule, profileImage } = useApp();
@@ -39,7 +40,8 @@ export const RulesScreen = () => {
 
   const handlePrintFormalPdf = () => {
     const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
-    const logoHtml = profileImage ? `<img src="${profileImage}" alt="Logo" style="max-height: 60px; max-width: 140px; object-fit: contain; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;" />` : '';
+    const effectiveLogo = profileImage || COTUFAS_LOGO_DATA_URL;
+    const logoHtml = effectiveLogo ? `<img src="${effectiveLogo}" alt="Logo" style="max-height: 60px; max-width: 140px; object-fit: contain; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;" />` : '';
 
     const html = `
 <!DOCTYPE html>
