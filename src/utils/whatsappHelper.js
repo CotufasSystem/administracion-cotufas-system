@@ -1,4 +1,4 @@
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import { formatCurrency } from './formatters';
 
 export const cleanPhoneNumber = (phone = '') => {
@@ -100,10 +100,10 @@ export const sendWhatsAppMessage = (phone, text) => {
     ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`
     : `https://api.whatsapp.com/send?text=${encodedText}`;
 
-  if (typeof window !== 'undefined') {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
     window.open(url, '_blank');
   } else {
-    Linking.openURL(url);
+    Linking.openURL(url).catch((err) => console.error('Error opening WhatsApp:', err));
   }
 };
 
