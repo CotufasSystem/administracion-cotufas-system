@@ -1,4 +1,4 @@
-﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const STORAGE_KEY = '@cotufas_system_db_v1';
 export const PIN_KEY = '@cotufas_system_pin';
@@ -45,7 +45,10 @@ export const storage = {
   },
   saveDatabase: async (data) => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      const json = await AsyncStorage.getItem(STORAGE_KEY);
+      const existing = json ? JSON.parse(json) : {};
+      const merged = { ...existing, ...data };
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
     } catch (e) {
       console.error('Error in saveDatabase', e);
     }

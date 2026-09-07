@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ModalWrapper, CustomInput, PrimaryButton } from '../common/UIComponents';
@@ -15,6 +15,7 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
   const [binance, setBinance] = useState('');
   const [area, setArea] = useState('');
   const [schedule, setSchedule] = useState('');
+  const [pin, setPin] = useState('');
   const [exemptAttendance, setExemptAttendance] = useState(false);
   const [selectedProjects, setSelectedProjects] = useState([]);
 
@@ -28,6 +29,7 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
       setBinance(employee.binance || '');
       setArea(employee.area || 'Operaciones');
       setSchedule(employee.schedule || '9:00 AM - 5:00 PM');
+      setPin(employee.pin || '');
       setExemptAttendance(Boolean(employee.exemptAttendance));
       setSelectedProjects(employee.projectIds || []);
     } else {
@@ -39,6 +41,7 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
       setBinance('');
       setArea('Operaciones');
       setSchedule('9:00 AM - 5:00 PM');
+      setPin('');
       setExemptAttendance(false);
       setSelectedProjects([]);
     }
@@ -64,6 +67,7 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
       binance: binance.trim(),
       area: area.trim(),
       schedule: schedule.trim(),
+      pin: pin.trim(),
       exemptAttendance,
       projectIds: selectedProjects,
     });
@@ -152,12 +156,24 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
           onChangeText={setBinance}
         />
 
-        <CustomInput
-          label="Horario Laboral"
-          placeholder="Ej: 9:00 AM - 1:00 PM"
-          value={schedule}
-          onChangeText={setSchedule}
-        />
+        <View style={styles.twoColRow}>
+          <View style={{ flex: 1 }}>
+            <CustomInput
+              label="Horario Laboral"
+              placeholder="Ej: 9:00 AM - 1:00 PM"
+              value={schedule}
+              onChangeText={setSchedule}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <CustomInput
+              label="Contraseña / PIN Portal"
+              placeholder="Opcional (por defecto C.I.)"
+              value={pin}
+              onChangeText={setPin}
+            />
+          </View>
+        </View>
 
         {/* Attendance Exemption Switch */}
         <View style={styles.switchRow}>

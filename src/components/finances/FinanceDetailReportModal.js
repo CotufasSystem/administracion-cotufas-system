@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
@@ -144,7 +144,7 @@ export const FinanceDetailReportModal = ({ visible, onClose, periodLabel, startD
                 <View key={p.id} style={styles.row}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle}>{p.title}</Text>
-                    <Text style={styles.rowDetail}>{p.description} • Fecha: 📅 {p.date}</Text>
+                    {p.description ? <Text style={styles.rowDetail}>{p.description}</Text> : null}
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={[styles.rowAmount, { color: THEME.colors.success }]}>+{formatCurrency(p.amount)}</Text>
@@ -163,7 +163,7 @@ export const FinanceDetailReportModal = ({ visible, onClose, periodLabel, startD
                 <View key={i.id} style={styles.row}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle}>{i.title}</Text>
-                    <Text style={styles.rowDetail}>{i.note ? `${i.note} • ` : ''}Fecha ingreso: 📅 {formatDate(i.date)}</Text>
+                    {i.note ? <Text style={styles.rowDetail}>{i.note}</Text> : null}
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={[styles.rowAmount, { color: THEME.colors.success }]}>+{formatCurrency(i.amount)}</Text>
@@ -182,7 +182,7 @@ export const FinanceDetailReportModal = ({ visible, onClose, periodLabel, startD
                 <View key={d.id} style={styles.row}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle}>{d.title}</Text>
-                    <Text style={styles.rowDetail}>{d.note ? `${d.note} • ` : ''}Fecha registro: 📅 {formatDate(d.date)}</Text>
+                    {d.note ? <Text style={styles.rowDetail}>{d.note}</Text> : null}
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={[styles.rowAmount, { color: THEME.colors.accent }]}>+{formatCurrency(d.amount)}</Text>
@@ -201,7 +201,7 @@ export const FinanceDetailReportModal = ({ visible, onClose, periodLabel, startD
                 <View key={p.id} style={styles.row}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle}>{p.empName} <Text style={styles.rowSub}>({p.area})</Text></Text>
-                    <Text style={styles.rowDetail}>Base: {formatCurrency(p.salary)} • Adelanto Restado: -{formatCurrency(p.discount)} • Fecha: 📅 {formatDate(p.date)}</Text>
+                    <Text style={styles.rowDetail}>Base: {formatCurrency(p.salary)}{p.discount > 0 ? ` • Adelanto Restado: -${formatCurrency(p.discount)}` : ''}</Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={[styles.rowAmount, { color: THEME.colors.warning }]}>{formatCurrency(p.netPay)}</Text>
@@ -220,7 +220,7 @@ export const FinanceDetailReportModal = ({ visible, onClose, periodLabel, startD
                 <View key={`${a.id}-${idx}`} style={styles.row}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle}>{a.title}</Text>
-                    <Text style={styles.rowDetail}>{a.note ? `${a.note} • ` : ''}Fecha entrega: 📅 {formatDate(a.date)}</Text>
+                    {a.note ? <Text style={styles.rowDetail}>{a.note}</Text> : null}
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={[styles.rowAmount, { color: THEME.colors.danger }]}>-{formatCurrency(a.amount)}</Text>
@@ -239,7 +239,7 @@ export const FinanceDetailReportModal = ({ visible, onClose, periodLabel, startD
                 <View key={d.id} style={styles.row}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle}>{d.title}</Text>
-                    <Text style={styles.rowDetail}>{d.note ? `${d.note} • ` : ''}Fecha límite / registro: 📅 {formatDate(d.date)}</Text>
+                    {d.note ? <Text style={styles.rowDetail}>{d.note}</Text> : null}
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={[styles.rowAmount, { color: THEME.colors.danger }]}>-{formatCurrency(d.amount)}</Text>

@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../constants/theme';
@@ -8,6 +8,7 @@ import { AgendaModal } from '../components/agenda/AgendaModal';
 import { PinConfirmModal } from '../components/common/PinConfirmModal';
 import { autoDispatchTomorrowReminders, getSentReminders, buildReminderEmailContent } from '../utils/emailNotifier';
 import { formatCurrency, formatDate, getLocalDateString } from '../utils/formatters';
+import { playChimeSound } from '../hooks/useAgendaReminders';
 import { useApp } from '../context/AppContext';
 
 export const AgendaScreen = () => {
@@ -68,8 +69,14 @@ export const AgendaScreen = () => {
       {tomorrowEvents.length > 0 && (
         <Card style={styles.reminderBanner}>
           <View style={styles.reminderHeader}>
-            <Ionicons name="notifications" size={18} color={THEME.colors.primary} />
-            <Text style={styles.reminderTitle}>Recordatorio Automático: {tomorrowEvents.length} Cita(s) para Mañana ({formatDate(tomorrowStr)})</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+              <Ionicons name="notifications" size={18} color="#ea580c" />
+              <Text style={styles.reminderTitle}>🔔 Alarma: {tomorrowEvents.length} Cita(s) o Reunión(es) para Mañana ({formatDate(tomorrowStr)})</Text>
+            </View>
+            <TouchableOpacity style={styles.chimeHeaderBtn} onPress={playChimeSound} activeOpacity={0.7} title="Probar Alarma Sonora">
+              <Ionicons name="volume-high" size={14} color="#ea580c" />
+              <Text style={styles.chimeHeaderText}>Sonar Alarma</Text>
+            </TouchableOpacity>
           </View>
           {tomorrowEvents.map(e => {
             const email = e.email || e.contactEmail;
@@ -194,8 +201,10 @@ const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' },
   topActions: { flexDirection: 'row', gap: 6 },
   reminderBanner: { backgroundColor: 'rgba(37, 99, 235, 0.08)', borderColor: 'rgba(37, 99, 235, 0.2)', borderWidth: 1, gap: 8 },
-  reminderHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  reminderTitle: { color: THEME.colors.primary, fontSize: 13, fontWeight: '800' },
+  reminderHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6, flexWrap: 'wrap' },
+  reminderTitle: { color: '#ea580c', fontSize: 13, fontWeight: '800' },
+  chimeHeaderBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(234, 88, 12, 0.1)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(234, 88, 12, 0.25)' },
+  chimeHeaderText: { color: '#ea580c', fontSize: 11, fontWeight: '800' },
   reminderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#ffffff', padding: 10, borderRadius: THEME.radius.md, gap: 8, flexWrap: 'wrap', borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.15)' },
   reminderItemTitle: { color: THEME.colors.textMain, fontSize: 13, fontWeight: '700' },
   reminderItemTime: { color: THEME.colors.textMuted, fontSize: 11, marginTop: 2 },

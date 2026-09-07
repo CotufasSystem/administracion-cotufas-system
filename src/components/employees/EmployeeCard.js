@@ -1,11 +1,12 @@
-﻿import React from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import { useApp } from '../../context/AppContext';
+import { EditIcon, TrashIcon, WhatsAppIcon } from '../common/AppIcons';
 
-export const EmployeeCard = ({ employee, onEdit, onDelete }) => {
+export const EmployeeCard = ({ employee, onEdit, onDelete, onWhatsApp }) => {
   const { projects } = useApp();
 
   const assignedProjects = (employee.projectIds || [])
@@ -28,11 +29,19 @@ export const EmployeeCard = ({ employee, onEdit, onDelete }) => {
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => onEdit(employee)}>
-            <Ionicons name="create-outline" size={16} color={THEME.colors.accent} />
+          <TouchableOpacity
+            style={styles.whatsappBtn}
+            onPress={() => onWhatsApp?.(employee)}
+            activeOpacity={0.7}
+            title="Enviar Comprobante WhatsApp"
+          >
+            <WhatsAppIcon size={15} color="#25D366" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => onDelete(employee.id)}>
-            <Ionicons name="trash-outline" size={16} color={THEME.colors.danger} />
+          <TouchableOpacity style={styles.editBtn} onPress={() => onEdit(employee)} activeOpacity={0.7} title="Editar Empleado">
+            <EditIcon size={15} color={THEME.colors.accent} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteBtn} onPress={() => onDelete(employee.id)} activeOpacity={0.7} title="Eliminar Empleado">
+            <TrashIcon size={15} color={THEME.colors.danger} />
           </TouchableOpacity>
         </View>
       </View>
@@ -134,7 +143,9 @@ const styles = StyleSheet.create({
   salaryBadge: { backgroundColor: '#ffffff', paddingHorizontal: 8, paddingVertical: 3, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.25)' },
   salaryText: { color: THEME.colors.primaryDark, fontSize: 12, fontWeight: '800' },
   actions: { flexDirection: 'row', gap: 6 },
-  actionBtn: { backgroundColor: '#ffffff', padding: 6, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.2)' },
+  whatsappBtn: { backgroundColor: 'rgba(37, 211, 102, 0.12)', borderWidth: 1, borderColor: 'rgba(37, 211, 102, 0.3)', padding: 6, borderRadius: THEME.radius.sm, justifyContent: 'center', alignItems: 'center' },
+  editBtn: { backgroundColor: 'rgba(37, 99, 235, 0.1)', borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.25)', padding: 6, borderRadius: THEME.radius.sm, justifyContent: 'center', alignItems: 'center' },
+  deleteBtn: { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.25)', padding: 6, borderRadius: THEME.radius.sm, justifyContent: 'center', alignItems: 'center' },
   contactRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', backgroundColor: '#ffffff', padding: 7, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.15)' },
   contactItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   contactText: { color: THEME.colors.textMain, fontSize: 11, fontWeight: '700' },

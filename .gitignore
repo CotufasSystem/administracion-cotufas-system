@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 .expo/
 dist/
 web-build/
@@ -13,3 +13,4 @@ npm-debug.*
 .env
 .env.local
 .env*.local
+.firebase/

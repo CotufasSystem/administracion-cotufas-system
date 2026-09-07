@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../constants/theme';
 import { ProfileAvatar } from '../components/common/ProfileAvatar';
@@ -12,27 +12,43 @@ export const AuthScreen = () => {
   const [error, setError] = useState(false);
   const [isPortalOpen, setIsPortalOpen] = useState(false);
 
-  const handleKeyPress = (digit) => {
-    if (pin.length < 6) {
-      const newPin = pin + digit;
-      setPin(newPin);
-      setError(false);
-      if (newPin.length === 6) {
-        setTimeout(() => {
-          const success = login(newPin);
-          if (!success) {
-            setError(true);
-            setPin('');
-          }
-        }, 100);
-      }
-    }
-  };
-
-  const handleDelete = () => {
-    setPin(pin.slice(0, -1));
+  const handleKeyPress = useCallback((digit) => {
     setError(false);
-  };
+    setPin((prev) => (prev.length < 6 ? prev + digit : prev));
+  }, []);
+
+  const handleDelete = useCallback(() => {
+    setError(false);
+    setPin((prev) => prev.slice(0, -1));
+  }, []);
+
+  // Trigger login verification once 6 digits are entered
+  useEffect(() => {
+    if (pin.length === 6) {
+      const timer = setTimeout(() => {
+        const success = login(pin);
+        if (!success) {
+          setError(true);
+          setPin('');
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [pin, login]);
+
+  // Listen to physical keyboard on Web
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const handleKeyDown = (e) => {
+      if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(e.key)) {
+        handleKeyPress(e.key);
+      } else if (e.key === 'Backspace') {
+        handleDelete();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyPress, handleDelete]);
 
   return (
     <View style={styles.container}>

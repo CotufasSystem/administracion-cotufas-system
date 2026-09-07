@@ -7,7 +7,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build:web": "expo export -p web && node scripts/copyFonts.js",
+    "deploy": "expo export -p web && node scripts/copyFonts.js && firebase deploy --only hosting"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -18,6 +20,7 @@
     "expo-font": "~13.0.4",
     "expo-local-authentication": "~15.0.2",
     "expo-status-bar": "~2.0.1",
+    "firebase": "^12.18.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.7",

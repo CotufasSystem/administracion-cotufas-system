@@ -12,6 +12,7 @@ export const AttendanceRow = ({ employee, record, onStatusChange, onValidate }) 
   const permissionNote = typeof record === 'object' ? record?.note : '';
   const isPending = typeof record === 'object' && record?.pendingValidation;
   const notifiedAt = typeof record === 'object' ? record?.notifiedAt : null;
+  const checkOutTime = typeof record === 'object' ? (record?.checkOutTime || record?.checkoutAt) : null;
   const displayHours = customHours || employee.schedule || '9:00 AM - 5:00 PM';
 
   const [hoursInput, setHoursInput] = useState(displayHours);
@@ -53,7 +54,17 @@ export const AttendanceRow = ({ employee, record, onStatusChange, onValidate }) 
           {isPending && (
             <View style={styles.pendingBadge}>
               <Ionicons name="time" size={12} color={THEME.colors.warning} />
-              <Text style={styles.pendingBadgeText}>Notificó {notifiedAt || 'Hoy'}</Text>
+              <Text style={styles.pendingBadgeText}>
+                Entrada: {notifiedAt || 'Hoy'}{checkOutTime ? ` • Salida: ${checkOutTime}` : ''}
+              </Text>
+            </View>
+          )}
+          {!isPending && (notifiedAt || checkOutTime) && (
+            <View style={styles.timeBadge}>
+              <Ionicons name="time-outline" size={11} color={THEME.colors.success} />
+              <Text style={styles.timeBadgeText}>
+                {notifiedAt ? `Entrada: ${notifiedAt}` : ''}{checkOutTime ? ` • Salida: ${checkOutTime}` : ''}
+              </Text>
             </View>
           )}
           {customHours && customHours !== employee.schedule && (
@@ -169,6 +180,8 @@ const styles = StyleSheet.create({
   name: { color: THEME.colors.textMain, fontSize: 15, fontWeight: '700' },
   pendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(245, 158, 11, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: THEME.radius.sm },
   pendingBadgeText: { color: THEME.colors.warning, fontSize: 10, fontWeight: '800' },
+  timeBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(16, 185, 129, 0.1)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.25)' },
+  timeBadgeText: { color: THEME.colors.success, fontSize: 10, fontWeight: '700' },
   customBadge: { backgroundColor: 'rgba(245, 158, 11, 0.15)', borderWidth: 1, borderColor: THEME.colors.primary, paddingHorizontal: 6, paddingVertical: 1, borderRadius: THEME.radius.sm },
   customBadgeText: { color: THEME.colors.primary, fontSize: 9, fontWeight: '800' },
   actionsRight: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },

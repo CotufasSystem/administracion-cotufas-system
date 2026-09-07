@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import { useApp } from '../../context/AppContext';
+import { EditIcon, TrashIcon, RestaurantIcon, UserIcon } from '../common/AppIcons';
 
 export const ProjectCard = ({ project, onEdit, onDelete, onOpenRestaurants, restaurantsCount = 0 }) => {
   const { employees } = useApp();
@@ -25,11 +26,11 @@ export const ProjectCard = ({ project, onEdit, onDelete, onOpenRestaurants, rest
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => onEdit(project)}>
-            <Ionicons name="create-outline" size={16} color={THEME.colors.accent} />
+          <TouchableOpacity style={styles.editBtn} onPress={() => onEdit(project)} activeOpacity={0.7} title="Editar Proyecto">
+            <EditIcon size={15} color={THEME.colors.accent} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => onDelete(project.id)}>
-            <Ionicons name="trash-outline" size={16} color={THEME.colors.danger} />
+          <TouchableOpacity style={styles.deleteBtn} onPress={() => onDelete(project.id)} activeOpacity={0.7} title="Eliminar Proyecto">
+            <TrashIcon size={15} color={THEME.colors.danger} />
           </TouchableOpacity>
         </View>
       </View>
@@ -44,7 +45,7 @@ export const ProjectCard = ({ project, onEdit, onDelete, onOpenRestaurants, rest
         </View>
         {isMaseasy && (
           <TouchableOpacity style={styles.restaurantsBtn} onPress={() => onOpenRestaurants(project)} activeOpacity={0.8}>
-            <Ionicons name="restaurant" size={13} color="#000" />
+            <RestaurantIcon size={14} color="#ffffff" />
             <Text style={styles.restaurantsBtnText}>Locales / Clientes ({restaurantsCount})</Text>
           </TouchableOpacity>
         )}
@@ -60,7 +61,7 @@ export const ProjectCard = ({ project, onEdit, onDelete, onOpenRestaurants, rest
           {assignedEmployees.length > 0 ? (
             assignedEmployees.map((emp) => (
               <View key={emp.id} style={styles.empTag}>
-                <Ionicons name="person" size={11} color={THEME.colors.primary} />
+                <UserIcon size={12} color={THEME.colors.primary} />
                 <Text style={styles.empTagText}>{emp.name}</Text>
               </View>
             ))
@@ -86,7 +87,8 @@ const styles = StyleSheet.create({
   statusTextActive: { color: THEME.colors.success },
   statusTextCompleted: { color: THEME.colors.textDim },
   actions: { flexDirection: 'row', gap: 6 },
-  actionBtn: { backgroundColor: '#ffffff', padding: 6, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.2)' },
+  editBtn: { backgroundColor: 'rgba(37, 99, 235, 0.1)', borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.25)', padding: 6, borderRadius: THEME.radius.sm, justifyContent: 'center', alignItems: 'center' },
+  deleteBtn: { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.25)', padding: 6, borderRadius: THEME.radius.sm, justifyContent: 'center', alignItems: 'center' },
   revenueBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#ffffff', paddingHorizontal: 10, paddingVertical: 8, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.15)', flexWrap: 'wrap', gap: 8 },
   revenueLabel: { color: THEME.colors.textMuted, fontSize: 11 },
   revenueValue: { color: THEME.colors.success, fontSize: 14, fontWeight: '800' },

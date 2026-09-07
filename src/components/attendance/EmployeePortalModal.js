@@ -8,7 +8,7 @@ import { EmployeePortalAuthView } from './EmployeePortalAuthView';
 import { EmployeePortalDetailView } from './EmployeePortalDetailView';
 
 export const EmployeePortalModal = ({ visible, onClose }) => {
-  const { employees = [], attendance = {}, notifySelfAttendance, payrollPayments = [] } = useApp() || {};
+  const { employees = [], saveEmployee, attendance = {}, notifySelfAttendance, payrollPayments = [] } = useApp() || {};
   const activeEmployees = useMemo(
     () => (employees || []).filter((e) => e?.status !== 'inactive' && !e?.exemptAttendance && !e?.isOwner),
     [employees]
@@ -138,12 +138,22 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
     setAuthError('');
   };
 
-  const handleNotifyAttendance = () => {
+  const handleNotifyAttendance = (type = 'checkin') => {
     if (!authenticatedEmployee) return;
-    notifySelfAttendance(authenticatedEmployee.id);
-    const msg = `¡Asistencia notificada para ${authenticatedEmployee.name}! Pendiente por validación.`;
+    notifySelfAttendance(authenticatedEmployee.id, type);
+    const label = type === 'checkout' ? 'Salida' : 'Entrada';
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const msg = `¡Hora de ${label} (${nowTime}) registrada con éxito para ${authenticatedEmployee.name}!`;
     if (Platform.OS === 'web') window.alert(msg);
-    else Alert.alert('Asistencia Notificada', msg);
+    else Alert.alert(`Hora de ${label} Registrada`, msg);
+  };
+
+  const handleUpdatePassword = (newPin) => {
+    if (!authenticatedEmployee || !saveEmployee) return;
+    saveEmployee({
+      ...authenticatedEmployee,
+      pin: newPin,
+    });
   };
 
   return (
@@ -181,6 +191,7 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
             myPayments={myPayments}
             myMonthAttendance={myMonthAttendance}
             onNotifyAttendance={handleNotifyAttendance}
+            onUpdatePassword={handleUpdatePassword}
             onLogout={handleLogoutEmp}
           />
         )}
