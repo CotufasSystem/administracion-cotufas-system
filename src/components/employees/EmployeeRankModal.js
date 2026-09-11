@@ -33,7 +33,7 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
         lateCount,
         totalBonuses,
         customPoints,
-        score: Math.max(0, score),
+        score,
       };
     }).sort((a, b) => b.score - a.score);
   }, [employees, attendance, payrollPayments]);
@@ -54,7 +54,7 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
   const handleQuickAddPoints = (emp, delta) => {
     if (!onSaveEmployee) return;
     const current = Number(emp.customPoints) || 0;
-    const updated = Math.max(0, current + delta);
+    const updated = current + delta;
     onSaveEmployee({
       ...emp,
       customPoints: updated,
@@ -63,7 +63,8 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
 
   const handleSaveCustomPoints = (emp) => {
     if (!onSaveEmployee) return;
-    const updated = Math.max(0, Number(tempPointsVal) || 0);
+    const parsed = Number(tempPointsVal);
+    const updated = isNaN(parsed) ? 0 : parsed;
     onSaveEmployee({
       ...emp,
       customPoints: updated,
@@ -202,7 +203,9 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
                 </View>
 
                 <View style={styles.scoreBox}>
-                  <Text style={styles.scoreVal}>{emp.score} pts</Text>
+                  <Text style={[styles.scoreVal, emp.score < 0 && styles.scoreValNegative]}>
+                    {emp.score} pts
+                  </Text>
                   <Text style={styles.scoreLabel}>Puntuación</Text>
                 </View>
               </View>
@@ -311,5 +314,6 @@ const styles = StyleSheet.create({
   editPointPencilText: { fontSize: 10.5, color: THEME.colors.primary, fontWeight: '800' },
   scoreBox: { alignItems: 'flex-end', minWidth: 65 },
   scoreVal: { color: THEME.colors.primary, fontSize: 16, fontWeight: '900', letterSpacing: -0.2 },
+  scoreValNegative: { color: THEME.colors.danger },
   scoreLabel: { color: THEME.colors.textDim, fontSize: 9.5, fontWeight: '600' },
 });
