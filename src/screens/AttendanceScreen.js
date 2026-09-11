@@ -130,13 +130,14 @@ export const AttendanceScreen = () => {
       </View>
 
       {/* Project Filter Tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+      <View style={styles.filterWrapper}>
         <TouchableOpacity
           style={[styles.filterChip, selectedProjectFilter === 'all' && styles.filterChipActive]}
           onPress={() => setSelectedProjectFilter('all')}
+          activeOpacity={0.8}
         >
           <Text style={[styles.filterText, selectedProjectFilter === 'all' && styles.filterTextActive]}>
-            Todos los Grupos ({activeAttendanceEmployees.length})
+            Todos ({activeAttendanceEmployees.length})
           </Text>
         </TouchableOpacity>
         {allGroups.map((g) => (
@@ -144,13 +145,14 @@ export const AttendanceScreen = () => {
             key={g.id}
             style={[styles.filterChip, selectedProjectFilter === g.id && styles.filterChipActive]}
             onPress={() => setSelectedProjectFilter(g.id)}
+            activeOpacity={0.8}
           >
             <Text style={[styles.filterText, selectedProjectFilter === g.id && styles.filterTextActive]}>
               {g.name} ({g.employees.length})
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </View>
 
       {/* Groups Attendance List */}
       {visibleGroups.map((group) => (
@@ -205,10 +207,17 @@ const styles = StyleSheet.create({
   statBadge: { flex: 1, minWidth: 70, backgroundColor: 'rgba(37, 99, 235, 0.08)', padding: 8, borderRadius: THEME.radius.md, alignItems: 'center', borderWidth: 1 },
   statNum: { fontSize: 16, fontWeight: '900' },
   statLabel: { color: THEME.colors.textDim, fontSize: 10, fontWeight: '700', textTransform: 'uppercase', marginTop: 2 },
-  filterScroll: { gap: 8, paddingVertical: 4 },
-  filterChip: { backgroundColor: 'rgba(37, 99, 235, 0.08)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: THEME.radius.md, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.18)' },
+  filterWrapper: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 2 },
+  filterChip: {
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+    borderRadius: THEME.radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.18)',
+  },
   filterChipActive: { backgroundColor: THEME.colors.primary, borderColor: THEME.colors.primary },
-  filterText: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '600' },
+  filterText: { color: THEME.colors.primaryDark, fontSize: 11.5, fontWeight: '700' },
   filterTextActive: { color: '#ffffff', fontWeight: '800' },
   quickGroupBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: THEME.colors.primary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: THEME.radius.sm },
   quickGroupBtnText: { color: '#ffffff', fontSize: 11, fontWeight: '800' },
