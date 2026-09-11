@@ -151,8 +151,13 @@ export const ProposalGeneratorModal = ({ visible, onClose }) => {
             <View key={it.id} style={styles.itemRow}>
               <Text style={styles.itemIdx}>{idx + 1}</Text>
               <TextInput style={[styles.input, { flex: 3 }]} value={it.desc} onChangeText={v => handleUpdateItem(it.id, 'desc', v)} placeholder="Descripción del servicio" placeholderTextColor={THEME.colors.textDim} />
-              <TextInput style={[styles.input, { flex: 1 }]} value={it.amount} onChangeText={v => handleUpdateItem(it.id, 'amount', v)} placeholder="Monto $" keyboardType="numeric" placeholderTextColor={THEME.colors.textDim} />
-              <TouchableOpacity onPress={() => handleRemoveItem(it.id)} style={styles.delBtn}>
+              <TextInput style={[styles.input, { width: 85 }]} value={it.amount} onChangeText={v => handleUpdateItem(it.id, 'amount', v)} placeholder="Monto $" keyboardType="numeric" placeholderTextColor={THEME.colors.textDim} />
+              <TouchableOpacity
+                onPress={() => handleRemoveItem(it.id)}
+                style={styles.delBtn}
+                activeOpacity={0.7}
+                title="Eliminar este ítem"
+              >
                 <Ionicons name="trash-outline" size={16} color={THEME.colors.danger} />
               </TouchableOpacity>
             </View>
@@ -185,7 +190,15 @@ const styles = StyleSheet.create({
   addBtnText: { color: '#000', fontSize: 11, fontWeight: '800' },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   itemIdx: { color: THEME.colors.textDim, fontSize: 12, fontWeight: '800', width: 16 },
-  delBtn: { padding: 4 },
+  delBtn: {
+    padding: 7,
+    borderRadius: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   totalRow: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 10, paddingVertical: 6 },
   totalLabel: { color: THEME.colors.textMain, fontSize: 14, fontWeight: '700' },
   totalVal: { color: THEME.colors.primary, fontSize: 18, fontWeight: '900' },
