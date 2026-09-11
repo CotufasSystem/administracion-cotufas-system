@@ -329,6 +329,10 @@ export const AppProvider = ({ children }) => {
     } catch (e) { return false; }
   };
 
+  const deleteAdvanceRequest = (id) => deleteItem('advance_requests', id, setAdvanceRequests);
+  const deleteLeaveRequest = (id) => deleteItem('leave_requests', id, setLeaveRequests);
+  const deleteAttendanceJustification = (id) => deleteItem('attendance_justifications', id, setAttendanceJustifications);
+
   return (
     <AppContext.Provider value={{
       employees, saveEmployee, updateEmployeePortalProfile, deleteEmployee, addAdvance, clearOrApplyAdvances, deleteAdvanceEntry, setAdvance,
@@ -344,9 +348,9 @@ export const AppProvider = ({ children }) => {
       resetProfileImage: () => { setProfileImage(null); saveSettingsToFirestore({ profileImage: null }); },
       themeMode, toggleThemeMode,
       employeeOfMonth, saveEmployeeOfMonth,
-      advanceRequests,
-      leaveRequests,
-      attendanceJustifications,
+      advanceRequests, deleteAdvanceRequest,
+      leaveRequests, deleteLeaveRequest,
+      attendanceJustifications, deleteAttendanceJustification,
       isAuthenticated, login, logout, isLoaded, masterPin, updatePin, changeMasterPin: updatePin,
       exportDatabaseJson, importDatabaseJson,
     }}>

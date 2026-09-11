@@ -15,8 +15,11 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
     notifySelfAttendance,
     payrollPayments = [],
     advanceRequests = [],
+    deleteAdvanceRequest,
     leaveRequests = [],
+    deleteLeaveRequest,
     attendanceJustifications = [],
+    deleteAttendanceJustification,
     employeeOfMonth,
   } = useApp() || {};
   const activeEmployees = useMemo(
@@ -211,8 +214,11 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
             myMonthAttendance={myMonthAttendance}
             attendance={attendance}
             advanceRequests={advanceRequests}
+            onDeleteAdvanceRequest={deleteAdvanceRequest}
             leaveRequests={leaveRequests}
+            onDeleteLeaveRequest={deleteLeaveRequest}
             attendanceJustifications={attendanceJustifications}
+            onDeleteAttendanceJustification={deleteAttendanceJustification}
             onNotifyAttendance={handleNotifyAttendance}
             onUpdateProfile={handleUpdateProfile}
             onLogout={handleLogoutEmp}

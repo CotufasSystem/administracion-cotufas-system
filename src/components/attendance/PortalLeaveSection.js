@@ -13,7 +13,7 @@ const LEAVE_TYPES = [
   { id: 'vacation', label: 'Vacaciones', icon: 'sunny-outline', color: '#d97706' },
 ];
 
-export const PortalLeaveSection = ({ employee, leaveRequests = [] }) => {
+export const PortalLeaveSection = ({ employee, leaveRequests = [], onDeleteRequest }) => {
   const [type, setType] = useState('medical_leave');
   const [startDate, setStartDate] = useState(getLocalDateString(new Date()));
   const [endDate, setEndDate] = useState(getLocalDateString(new Date()));
@@ -29,6 +29,20 @@ export const PortalLeaveSection = ({ employee, leaveRequests = [] }) => {
       .filter((r) => r.employeeId === employee?.id)
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   }, [leaveRequests, employee?.id]);
+
+  const handleDelete = (req) => {
+    const confirmText = `¿Deseas eliminar del historial esta solicitud de permiso/reposo?`;
+    if (Platform.OS === 'web') {
+      if (window.confirm(confirmText)) {
+        onDeleteRequest?.(req.id);
+      }
+    } else {
+      Alert.alert('Eliminar Solicitud', confirmText, [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Eliminar', style: 'destructive', onPress: () => onDeleteRequest?.(req.id) },
+      ]);
+    }
+  };
 
   const totalDays = useMemo(() => calculateTotalDays(startDate, endDate), [startDate, endDate]);
   const businessDays = useMemo(() => calculateBusinessDays(startDate, endDate), [startDate, endDate]);
@@ -304,9 +318,20 @@ export const PortalLeaveSection = ({ employee, leaveRequests = [] }) => {
                         📅 {formatDate(req.startDate)} al {formatDate(req.endDate)} ({req.totalDays || 1} días)
                       </Text>
                     </View>
-                    <View style={[styles.badgeContainer, { backgroundColor: badge.bg, borderColor: badge.border }]}>
-                      <Ionicons name={badge.icon} size={13} color={badge.color} />
-                      <Text style={[styles.badgeText, { color: badge.color }]}>{badge.label}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={[styles.badgeContainer, { backgroundColor: badge.bg, borderColor: badge.border }]}>
+                        <Ionicons name={badge.icon} size={13} color={badge.color} />
+                        <Text style={[styles.badgeText, { color: badge.color }]}>{badge.label}</Text>
+                      </View>
+                      {onDeleteRequest && (
+                        <TouchableOpacity
+                          style={styles.deleteReqBtn}
+                          onPress={() => handleDelete(req)}
+                          title="Eliminar del historial"
+                        >
+                          <Ionicons name="trash-outline" size={14} color={THEME.colors.danger} />
+                        </TouchableOpacity>
+                      )}
                     </View>
                   </View>
 
@@ -517,4 +542,11 @@ const styles = StyleSheet.create({
   adminFeedbackText: { color: THEME.colors.textMain, fontSize: 11, fontWeight: '600', marginTop: 1 },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 20, gap: 6 },
   emptyText: { color: THEME.colors.textDim, fontSize: 11.5, fontStyle: 'italic', textAlign: 'center' },
+  deleteReqBtn: {
+    padding: 4,
+    borderRadius: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
 });

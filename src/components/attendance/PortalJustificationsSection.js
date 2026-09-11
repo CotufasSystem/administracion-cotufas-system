@@ -5,7 +5,7 @@ import { THEME } from '../../constants/theme';
 import { formatDate } from '../../utils/formatters';
 import { getUnjustifiedIncidents, submitAttendanceJustification } from '../../services/portalService';
 
-export const PortalJustificationsSection = ({ employee, attendance = {}, attendanceJustifications = [] }) => {
+export const PortalJustificationsSection = ({ employee, attendance = {}, attendanceJustifications = [], onDeleteJustification }) => {
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [reason, setReason] = useState('');
   const [attachment, setAttachment] = useState(null);
@@ -24,6 +24,20 @@ export const PortalJustificationsSection = ({ employee, attendance = {}, attenda
       .filter((j) => j.employeeId === employee?.id)
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   }, [attendanceJustifications, employee?.id]);
+
+  const handleDelete = (j) => {
+    const confirmText = `¿Deseas eliminar del historial esta justificación del ${formatDate(j.dateKey)}?`;
+    if (Platform.OS === 'web') {
+      if (window.confirm(confirmText)) {
+        onDeleteJustification?.(j.id);
+      }
+    } else {
+      Alert.alert('Eliminar Justificación', confirmText, [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Eliminar', style: 'destructive', onPress: () => onDeleteJustification?.(j.id) },
+      ]);
+    }
+  };
 
   const handleFileUpload = (e) => {
     if (Platform.OS === 'web') {
@@ -268,9 +282,20 @@ export const PortalJustificationsSection = ({ employee, attendance = {}, attenda
                       <Text style={styles.historyDate}>Fecha Incidente: 📅 {formatDate(j.dateKey)}</Text>
                       <Text style={styles.historySub}>Enviada: {formatDate(j.createdAt)}</Text>
                     </View>
-                    <View style={[styles.badgeContainer, { backgroundColor: badge.bg, borderColor: badge.border }]}>
-                      <Ionicons name={badge.icon} size={12} color={badge.color} />
-                      <Text style={[styles.badgeText, { color: badge.color }]}>{badge.label}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={[styles.badgeContainer, { backgroundColor: badge.bg, borderColor: badge.border }]}>
+                        <Ionicons name={badge.icon} size={12} color={badge.color} />
+                        <Text style={[styles.badgeText, { color: badge.color }]}>{badge.label}</Text>
+                      </View>
+                      {onDeleteJustification && (
+                        <TouchableOpacity
+                          style={styles.deleteReqBtn}
+                          onPress={() => handleDelete(j)}
+                          title="Eliminar del historial"
+                        >
+                          <Ionicons name="trash-outline" size={14} color={THEME.colors.danger} />
+                        </TouchableOpacity>
+                      )}
                     </View>
                   </View>
 
@@ -479,4 +504,11 @@ const styles = StyleSheet.create({
   feedbackText: { color: THEME.colors.textMain, fontSize: 11, fontWeight: '600', marginTop: 1 },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 20, gap: 6 },
   emptyText: { color: THEME.colors.textDim, fontSize: 11.5, fontStyle: 'italic', textAlign: 'center' },
+  deleteReqBtn: {
+    padding: 4,
+    borderRadius: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
 });

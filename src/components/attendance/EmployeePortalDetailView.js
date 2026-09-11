@@ -33,6 +33,9 @@ export const EmployeePortalDetailView = ({
   advanceRequests = [],
   leaveRequests = [],
   attendanceJustifications = [],
+  onDeleteAdvanceRequest,
+  onDeleteLeaveRequest,
+  onDeleteAttendanceJustification,
   onNotifyAttendance,
   onUpdateProfile,
   onLogout,
@@ -405,6 +408,7 @@ export const EmployeePortalDetailView = ({
         <PortalAdvancesSection
           employee={employee}
           advanceRequests={advanceRequests}
+          onDeleteRequest={onDeleteAdvanceRequest}
         />
       )}
 
@@ -514,6 +518,7 @@ export const EmployeePortalDetailView = ({
         <PortalLeaveSection
           employee={employee}
           leaveRequests={leaveRequests}
+          onDeleteRequest={onDeleteLeaveRequest}
         />
       )}
 
@@ -523,6 +528,7 @@ export const EmployeePortalDetailView = ({
           employee={employee}
           attendance={attendance}
           attendanceJustifications={attendanceJustifications}
+          onDeleteJustification={onDeleteAttendanceJustification}
         />
       )}
     </View>

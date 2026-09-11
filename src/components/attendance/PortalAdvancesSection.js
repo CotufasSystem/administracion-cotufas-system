@@ -5,7 +5,7 @@ import { THEME } from '../../constants/theme';
 import { formatCurrency, formatDate, getLocalDateString } from '../../utils/formatters';
 import { submitAdvanceRequest } from '../../services/portalService';
 
-export const PortalAdvancesSection = ({ employee, advanceRequests = [], onRefresh }) => {
+export const PortalAdvancesSection = ({ employee, advanceRequests = [], onDeleteRequest, onRefresh }) => {
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   const [requiredByDate, setRequiredByDate] = useState(getLocalDateString(new Date()));
@@ -26,6 +26,20 @@ export const PortalAdvancesSection = ({ employee, advanceRequests = [], onRefres
   }, [advanceRequests, employee?.id]);
 
   const hasPending = myRequests.some((r) => r.status === 'pending');
+
+  const handleDelete = (req) => {
+    const confirmText = `¿Deseas eliminar del historial esta solicitud de adelanto de $${req.amount}?`;
+    if (Platform.OS === 'web') {
+      if (window.confirm(confirmText)) {
+        onDeleteRequest?.(req.id);
+      }
+    } else {
+      Alert.alert('Eliminar Solicitud', confirmText, [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Eliminar', style: 'destructive', onPress: () => onDeleteRequest?.(req.id) },
+      ]);
+    }
+  };
 
   const handleSubmit = async () => {
     setErrorMsg('');
@@ -222,9 +236,20 @@ export const PortalAdvancesSection = ({ employee, advanceRequests = [], onRefres
                         <Text style={styles.requestDate}>🎯 Requerido para: {formatDate(req.requiredByDate)}</Text>
                       ) : null}
                     </View>
-                    <View style={[styles.badgeContainer, { backgroundColor: badge.bg, borderColor: badge.border }]}>
-                      <Ionicons name={badge.icon} size={13} color={badge.color} />
-                      <Text style={[styles.badgeText, { color: badge.color }]}>{badge.label}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={[styles.badgeContainer, { backgroundColor: badge.bg, borderColor: badge.border }]}>
+                        <Ionicons name={badge.icon} size={13} color={badge.color} />
+                        <Text style={[styles.badgeText, { color: badge.color }]}>{badge.label}</Text>
+                      </View>
+                      {onDeleteRequest && (
+                        <TouchableOpacity
+                          style={styles.deleteReqBtn}
+                          onPress={() => handleDelete(req)}
+                          title="Eliminar del historial"
+                        >
+                          <Ionicons name="trash-outline" size={14} color={THEME.colors.danger} />
+                        </TouchableOpacity>
+                      )}
                     </View>
                   </View>
 
@@ -401,4 +426,11 @@ const styles = StyleSheet.create({
   adminFeedbackText: { color: THEME.colors.textMain, fontSize: 11, fontWeight: '600', marginTop: 1 },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 20, gap: 6 },
   emptyText: { color: THEME.colors.textDim, fontSize: 11.5, fontStyle: 'italic', textAlign: 'center' },
+  deleteReqBtn: {
+    padding: 4,
+    borderRadius: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
 });
