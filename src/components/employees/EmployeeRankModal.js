@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
@@ -38,7 +38,22 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
     }).sort((a, b) => b.score - a.score);
   }, [employees, attendance, payrollPayments]);
 
-  const currentEOM = employees.find(e => e.id === (employeeOfMonth?.empId || rankings[0]?.id));
+  useEffect(() => {
+    if (employeeOfMonth?.empId) {
+      setSelectedEmpId(employeeOfMonth.empId);
+      setReason(employeeOfMonth.reason || '');
+    } else if (rankings.length > 0 && !selectedEmpId) {
+      setSelectedEmpId(rankings[0].id);
+    }
+  }, [employeeOfMonth, visible, rankings]);
+
+  const activeEomId = selectedEmpId || employeeOfMonth?.empId || rankings[0]?.id;
+  const currentEOM = employees.find(e => e.id === activeEomId);
+
+  const handleSelectToDesignate = (empId) => {
+    setSelectedEmpId(empId);
+    setIsAssigning(true);
+  };
 
   const handleSaveEOM = () => {
     if (onSaveEmployeeOfMonth) {
@@ -94,14 +109,27 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
 
         {isAssigning && (
           <View style={styles.assignForm}>
-            <Text style={styles.formTitle}>Elegir Empleado del Mes</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 4 }}>
-              {employees.map(e => (
-                <TouchableOpacity key={e.id} style={[styles.empPick, selectedEmpId === e.id && styles.empPickActive]} onPress={() => setSelectedEmpId(e.id)}>
-                  <Text style={[styles.empPickText, selectedEmpId === e.id && styles.empPickTextActive]}>{e.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.formTitle}>Elegir Empleado del Mes</Text>
+              <TouchableOpacity onPress={() => setIsAssigning(false)}>
+                <Ionicons name="close-circle" size={20} color={THEME.colors.textDim} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.empPickContainer}>
+              {employees.map(e => {
+                const isSelected = selectedEmpId === e.id;
+                return (
+                  <TouchableOpacity
+                    key={e.id}
+                    style={[styles.empPick, isSelected && styles.empPickActive]}
+                    onPress={() => setSelectedEmpId(e.id)}
+                  >
+                    {isSelected && <Ionicons name="checkmark-circle" size={13} color="#ffffff" style={{ marginRight: 4 }} />}
+                    <Text style={[styles.empPickText, isSelected && styles.empPickTextActive]}>{e.name}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
             <TextInput
               style={styles.reasonInput}
               value={reason}
@@ -127,12 +155,33 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
             const isTop3 = idx === 2;
             const medal = isTop1 ? '🥇' : isTop2 ? '🥈' : isTop3 ? '🥉' : `#${idx + 1}`;
             const isEditingThis = editingPointsEmpId === emp.id;
+            const isCurrentSelected = activeEomId === emp.id;
 
             return (
-              <View key={emp.id} style={[styles.rankRow, isTop1 && styles.rankRowTop1]}>
+              <View key={emp.id} style={[styles.rankRow, isTop1 && styles.rankRowTop1, isCurrentSelected && styles.rankRowSelected]}>
                 <View style={styles.medalBox}><Text style={styles.medalText}>{medal}</Text></View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.empName}>{emp.name} <Text style={styles.empArea}>({emp.area})</Text></Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+                    <TouchableOpacity onPress={() => handleSelectToDesignate(emp.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={styles.empName}>{emp.name} <Text style={styles.empArea}>({emp.area})</Text></Text>
+                      {isCurrentSelected && (
+                        <View style={styles.currentEomBadge}>
+                          <Ionicons name="ribbon" size={10} color="#b45309" />
+                          <Text style={styles.currentEomBadgeText}>Empleado del Mes</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.quickDesignateBtn}
+                      onPress={() => handleSelectToDesignate(emp.id)}
+                      title="Seleccionar para Empleado del Mes"
+                    >
+                      <Ionicons name="ribbon-outline" size={12} color="#b45309" />
+                      <Text style={styles.quickDesignateBtnText}>Designar 🏆</Text>
+                    </TouchableOpacity>
+                  </View>
+
                   <Text style={styles.empStats}>
                     ✅ Asistencias: {emp.presentCount} | 🎁 Bonos: {formatCurrency(emp.totalBonuses)} | ⭐ Asignados: {emp.customPoints || 0} pts
                   </Text>
@@ -266,7 +315,8 @@ const styles = StyleSheet.create({
   assignBtnText: { color: '#000', fontSize: 11, fontWeight: '900' },
   assignForm: { backgroundColor: '#f8fafc', padding: 14, borderRadius: 12, gap: 10, borderWidth: 1, borderColor: '#e2e8f0' },
   formTitle: { color: '#0f172a', fontSize: 12, fontWeight: '800' },
-  empPick: { backgroundColor: '#ffffff', paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: '#e2e8f0' },
+  empPickContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingVertical: 4 },
+  empPick: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: '#e2e8f0' },
   empPickActive: { backgroundColor: THEME.colors.primary, borderColor: THEME.colors.primary },
   empPickText: { color: '#64748b', fontSize: 12, fontWeight: '700' },
   empPickTextActive: { color: '#ffffff', fontWeight: '900' },
@@ -295,6 +345,42 @@ const styles = StyleSheet.create({
     shadowColor: '#f59e0b',
     shadowOpacity: 0.12,
     shadowRadius: 10,
+  },
+  rankRowSelected: {
+    borderColor: '#f59e0b',
+    backgroundColor: '#fffbeb',
+  },
+  currentEomBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#fef3c7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#fde68a',
+  },
+  currentEomBadgeText: {
+    color: '#b45309',
+    fontSize: 9.5,
+    fontWeight: '800',
+  },
+  quickDesignateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#fef3c7',
+    borderWidth: 1,
+    borderColor: '#fde68a',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  quickDesignateBtnText: {
+    color: '#b45309',
+    fontSize: 10.5,
+    fontWeight: '800',
   },
   medalBox: { width: 34, alignItems: 'center' },
   medalText: { fontSize: 20, fontWeight: '900', color: THEME.colors.primary },
