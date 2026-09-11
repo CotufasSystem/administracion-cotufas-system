@@ -130,9 +130,21 @@ export const RulesScreen = () => {
           </View>
         </View>
         <View style={styles.exportButtons}>
-          <PrimaryButton title={copySuccess ? "¡Copiado a Portapapeles!" : "Copiar Formato (WhatsApp/Word)"} icon="logo-whatsapp" variant="success" onPress={handleCopyForWhatsApp} style={{ flex: 1 }} />
+          <PrimaryButton
+            title={copySuccess ? "¡Copiado a Portapapeles!" : "Copiar para WhatsApp"}
+            icon="logo-whatsapp"
+            variant="success"
+            onPress={handleCopyForWhatsApp}
+            style={styles.exportBtnItem}
+          />
           {Platform.OS === 'web' && (
-            <PrimaryButton title="Imprimir Reglamento PDF" icon="print-outline" variant="secondary" onPress={handlePrintFormalPdf} />
+            <PrimaryButton
+              title="Imprimir Reglamento PDF"
+              icon="print-outline"
+              variant="secondary"
+              onPress={handlePrintFormalPdf}
+              style={styles.exportBtnItem}
+            />
           )}
         </View>
       </Card>
@@ -176,8 +188,8 @@ const styles = StyleSheet.create({
   formalHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   coatBadge: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: THEME.colors.primary },
   formalTitle: { color: THEME.colors.textMain, fontSize: 14, fontWeight: '900', letterSpacing: 0.5 },
-  formalSub: { color: THEME.colors.textMuted, fontSize: 11, marginTop: 2 },
-  exportButtons: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  exportButtons: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', width: '100%' },
+  exportBtnItem: { flex: 1, minWidth: 150 },
   ruleItem: { backgroundColor: 'rgba(37, 99, 235, 0.08)', padding: 14, borderRadius: THEME.radius.md, marginBottom: 8, gap: 6, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.18)' },
   ruleHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   ruleNumBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: THEME.radius.sm, backgroundColor: THEME.colors.primary, justifyContent: 'center', alignItems: 'center' },
