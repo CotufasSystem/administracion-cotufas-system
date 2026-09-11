@@ -42,12 +42,13 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
     if (employeeOfMonth?.empId) {
       setSelectedEmpId(employeeOfMonth.empId);
       setReason(employeeOfMonth.reason || '');
-    } else if (rankings.length > 0 && !selectedEmpId) {
-      setSelectedEmpId(rankings[0].id);
+    } else {
+      setSelectedEmpId('');
+      setReason('');
     }
-  }, [employeeOfMonth, visible, rankings]);
+  }, [employeeOfMonth, visible]);
 
-  const activeEomId = selectedEmpId || employeeOfMonth?.empId || rankings[0]?.id;
+  const activeEomId = isAssigning ? selectedEmpId : (employeeOfMonth?.empId || '');
   const currentEOM = employees.find(e => e.id === activeEomId);
 
   const handleSelectToDesignate = (empId) => {
@@ -57,12 +58,25 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
 
   const handleSaveEOM = () => {
     if (onSaveEmployeeOfMonth) {
-      onSaveEmployeeOfMonth({
-        empId: selectedEmpId || currentEOM?.id,
-        reason: reason.trim() || 'Excelente desempeño, puntualidad y compromiso.',
-        monthYear: new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }),
-      });
+      if (!selectedEmpId) {
+        onSaveEmployeeOfMonth(null);
+      } else {
+        onSaveEmployeeOfMonth({
+          empId: selectedEmpId,
+          reason: reason.trim() || 'Excelente desempeño, puntualidad y compromiso.',
+          monthYear: new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }),
+        });
+      }
     }
+    setIsAssigning(false);
+  };
+
+  const handleClearEOM = () => {
+    if (onSaveEmployeeOfMonth) {
+      onSaveEmployeeOfMonth(null);
+    }
+    setSelectedEmpId('');
+    setReason('');
     setIsAssigning(false);
   };
 
@@ -91,20 +105,36 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
     <ModalWrapper visible={visible} onClose={onClose} title="Ranking de Rendimiento & Empleado del Mes" maxWidth={720}>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Empleado del Mes Spotlight */}
-        <View style={styles.spotlightCard}>
-          <View style={styles.trophyBadge}>
-            <Text style={{ fontSize: 26 }}>🏆</Text>
+        <View style={[styles.spotlightCard, !currentEOM && styles.spotlightCardEmpty]}>
+          <View style={[styles.trophyBadge, !currentEOM && styles.trophyBadgeEmpty]}>
+            <Text style={{ fontSize: 26 }}>{currentEOM ? '🏆' : '⭐'}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.spotlightLabel}>EMPLEADO DEL MES • {employeeOfMonth?.monthYear || 'Actual'}</Text>
-            <Text style={styles.spotlightName}>{currentEOM ? currentEOM.name : 'Por seleccionar'}</Text>
-            <Text style={styles.spotlightArea}>{currentEOM?.area || 'Operaciones'}</Text>
-            <Text style={styles.spotlightReason}>"{employeeOfMonth?.reason || 'Reconocimiento al mayor compromiso y eficiencia en el equipo.'}"</Text>
+            <Text style={[styles.spotlightLabel, !currentEOM && { color: THEME.colors.textDim }]}>
+              EMPLEADO DEL MES • {employeeOfMonth?.monthYear || 'Actual'}
+            </Text>
+            <Text style={styles.spotlightName}>
+              {currentEOM ? currentEOM.name : 'Sin empleado del mes asignado'}
+            </Text>
+            <Text style={styles.spotlightArea}>
+              {currentEOM ? currentEOM.area : 'Ningún colaborador seleccionado actualmente'}
+            </Text>
+            {currentEOM && employeeOfMonth?.reason ? (
+              <Text style={styles.spotlightReason}>"{employeeOfMonth.reason}"</Text>
+            ) : null}
           </View>
-          <TouchableOpacity style={styles.assignBtn} onPress={() => setIsAssigning(!isAssigning)}>
-            <Ionicons name="ribbon-outline" size={14} color="#000" />
-            <Text style={styles.assignBtnText}>Designar</Text>
-          </TouchableOpacity>
+          <View style={{ gap: 6, alignItems: 'flex-end' }}>
+            <TouchableOpacity style={styles.assignBtn} onPress={() => setIsAssigning(!isAssigning)}>
+              <Ionicons name="ribbon-outline" size={14} color="#000" />
+              <Text style={styles.assignBtnText}>Designar</Text>
+            </TouchableOpacity>
+            {employeeOfMonth?.empId ? (
+              <TouchableOpacity style={styles.clearEomBtn} onPress={handleClearEOM} title="Quitar empleado del mes">
+                <Ionicons name="close-circle-outline" size={13} color={THEME.colors.danger} />
+                <Text style={styles.clearEomBtnText}>Desasignar</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
         </View>
 
         {isAssigning && (
@@ -116,6 +146,17 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
               </TouchableOpacity>
             </View>
             <View style={styles.empPickContainer}>
+              {/* Opción para dejar sin empleado del mes */}
+              <TouchableOpacity
+                style={[styles.empPick, !selectedEmpId && styles.empPickNoneActive]}
+                onPress={() => setSelectedEmpId('')}
+              >
+                {!selectedEmpId && <Ionicons name="checkmark-circle" size={13} color="#ffffff" style={{ marginRight: 4 }} />}
+                <Text style={[styles.empPickText, !selectedEmpId && styles.empPickTextActive]}>
+                  🚫 Sin empleado del mes
+                </Text>
+              </TouchableOpacity>
+
               {employees.map(e => {
                 const isSelected = selectedEmpId === e.id;
                 return (
@@ -138,7 +179,9 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
               placeholderTextColor={THEME.colors.textDim}
             />
             <TouchableOpacity style={styles.saveEomBtn} onPress={handleSaveEOM}>
-              <Text style={styles.saveEomBtnText}>Guardar Reconocimiento</Text>
+              <Text style={styles.saveEomBtnText}>
+                {selectedEmpId ? 'Guardar Reconocimiento' : 'Guardar (Sin Empleado del Mes)'}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -287,6 +330,11 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 4,
   },
+  spotlightCardEmpty: {
+    backgroundColor: '#f8fafc',
+    borderColor: '#cbd5e1',
+    shadowOpacity: 0.05,
+  },
   trophyBadge: {
     width: 54,
     height: 54,
@@ -298,6 +346,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
+  },
+  trophyBadgeEmpty: {
+    backgroundColor: '#e2e8f0',
+    shadowOpacity: 0,
   },
   spotlightLabel: { color: '#b45309', fontSize: 10, fontWeight: '900', letterSpacing: 0.8 },
   spotlightName: { color: '#0f172a', fontSize: 17, fontWeight: '900', marginTop: 2 },
@@ -317,11 +369,31 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   assignBtnText: { color: '#000', fontSize: 11, fontWeight: '900' },
+  clearEomBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
+  clearEomBtnText: {
+    color: THEME.colors.danger,
+    fontSize: 10,
+    fontWeight: '800',
+  },
   assignForm: { backgroundColor: '#f8fafc', padding: 14, borderRadius: 12, gap: 10, borderWidth: 1, borderColor: '#e2e8f0' },
   formTitle: { color: '#0f172a', fontSize: 12, fontWeight: '800' },
   empPickContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingVertical: 4 },
   empPick: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: '#e2e8f0' },
   empPickActive: { backgroundColor: THEME.colors.primary, borderColor: THEME.colors.primary },
+  empPickNoneActive: {
+    backgroundColor: '#64748b',
+    borderColor: '#475569',
+  },
   empPickText: { color: '#64748b', fontSize: 12, fontWeight: '700' },
   empPickTextActive: { color: '#ffffff', fontWeight: '900' },
   reasonInput: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, color: '#0f172a', fontSize: 12, outlineStyle: 'none' },
