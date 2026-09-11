@@ -10,7 +10,7 @@ import { PortalJustificationsSection } from './PortalJustificationsSection';
 
 const PORTAL_TABS = [
   { id: 'attendance', label: 'Asistencia', icon: 'time-outline', activeIcon: 'time' },
-  { id: 'ranking', label: 'Rendimiento 🏆', icon: 'trophy-outline', activeIcon: 'trophy' },
+  { id: 'ranking', label: 'Mi Puntuación ⭐', icon: 'star-outline', activeIcon: 'star' },
   { id: 'advances', label: 'Adelantos', icon: 'cash-outline', activeIcon: 'cash' },
   { id: 'leave', label: 'Permisos', icon: 'medkit-outline', activeIcon: 'medkit' },
   { id: 'justifications', label: 'Justificar', icon: 'shield-checkmark-outline', activeIcon: 'shield-checkmark' },
@@ -454,61 +454,6 @@ export const EmployeePortalDetailView = ({
                 <Text style={styles.scoreBreakdownLabel}>⏰ Tardanzas ({myRankData?.lateCount || 0})</Text>
               </View>
             </View>
-          </View>
-
-          {/* Tabla de Rendimiento General */}
-          <View style={styles.portalRankList}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-              <Text style={styles.portalRankTitle}>Tabla de Posiciones del Equipo</Text>
-              <Text style={{ fontSize: 9.5, color: THEME.colors.textDim }}>Actualizado en vivo</Text>
-            </View>
-
-            {rankings.map((emp, idx) => {
-              const isMe = emp.id === employee.id;
-              const isTop1 = idx === 0;
-              const isTop2 = idx === 1;
-              const isTop3 = idx === 2;
-              const medal = isTop1 ? '🥇' : isTop2 ? '🥈' : isTop3 ? '🥉' : `#${idx + 1}`;
-              const isEmpEOM = employeeOfMonth?.empId === emp.id;
-
-              return (
-                <View
-                  key={emp.id}
-                  style={[
-                    styles.portalRankRow,
-                    isMe && styles.portalRankRowMe,
-                    isTop1 && !isMe && styles.portalRankRowTop1,
-                  ]}
-                >
-                  <View style={styles.portalMedalBox}>
-                    <Text style={styles.portalMedalText}>{medal}</Text>
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      <Text style={[styles.portalEmpName, isMe && { color: THEME.colors.primary, fontWeight: '900' }]}>
-                        {emp.name} {isMe ? '👤 (Tú)' : ''}
-                      </Text>
-                      {isEmpEOM && (
-                        <View style={styles.portalEomBadgeSmall}>
-                          <Ionicons name="ribbon" size={10} color="#b45309" />
-                          <Text style={styles.portalEomBadgeSmallText}>Empleado del Mes</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={styles.portalEmpStats}>
-                      {emp.area || 'Operaciones'} • ✅ {emp.presentCount} asistencias • 🎁 ${emp.totalBonuses} bonos
-                    </Text>
-                  </View>
-
-                  <View style={styles.portalScoreBox}>
-                    <Text style={[styles.portalScoreVal, emp.score < 0 && { color: THEME.colors.danger }]}>
-                      {emp.score} pts
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
           </View>
         </View>
       )}
