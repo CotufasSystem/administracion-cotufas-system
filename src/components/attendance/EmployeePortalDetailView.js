@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
@@ -42,6 +42,25 @@ export const EmployeePortalDetailView = ({
 }) => {
   const [activeTab, setActiveTab] = useState('attendance');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const tabsScrollRef = useRef(null);
+
+  const activeTabIdx = PORTAL_TABS.findIndex(t => t.id === activeTab);
+
+  const handlePrevTab = () => {
+    if (activeTabIdx > 0) {
+      const nextTab = PORTAL_TABS[activeTabIdx - 1];
+      setActiveTab(nextTab.id);
+      tabsScrollRef.current?.scrollTo({ x: Math.max(0, (activeTabIdx - 1) * 90), animated: true });
+    }
+  };
+
+  const handleNextTab = () => {
+    if (activeTabIdx < PORTAL_TABS.length - 1) {
+      const nextTab = PORTAL_TABS[activeTabIdx + 1];
+      setActiveTab(nextTab.id);
+      tabsScrollRef.current?.scrollTo({ x: (activeTabIdx + 1) * 90, animated: true });
+    }
+  };
 
   const checkInTime = typeof todayRecord === 'object' ? (todayRecord?.checkInTime || todayRecord?.notifiedAt) : null;
   const checkOutTime = typeof todayRecord === 'object' ? (todayRecord?.checkOutTime || todayRecord?.checkoutAt) : null;
@@ -229,44 +248,77 @@ export const EmployeePortalDetailView = ({
         />
       ) : null}
 
-      {/* Segmented Tab Navigation for Self-Service Modules */}
-      <View style={styles.tabsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
-          {PORTAL_TABS.map((tab) => {
-            const isActive = activeTab === tab.id;
-            const badgeCount =
-              tab.id === 'advances'
-                ? pendingAdvancesCount
-                : tab.id === 'leave'
-                ? pendingLeavesCount
-                : tab.id === 'justifications'
-                ? pendingJustsCount
-                : 0;
+      {/* Segmented Tab Navigation for Self-Service Modules with Arrow Nav */}
+      <View style={styles.tabsWrapper}>
+        <TouchableOpacity
+          style={[styles.tabArrowBtn, activeTabIdx === 0 && styles.tabArrowBtnDisabled]}
+          onPress={handlePrevTab}
+          disabled={activeTabIdx === 0}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="chevron-back"
+            size={18}
+            color={activeTabIdx === 0 ? '#cbd5e1' : THEME.colors.primary}
+          />
+        </TouchableOpacity>
 
-            return (
-              <TouchableOpacity
-                key={tab.id}
-                style={[styles.tabBtn, isActive && styles.tabBtnActive]}
-                onPress={() => setActiveTab(tab.id)}
-                activeOpacity={0.75}
-              >
-                <Ionicons
-                  name={isActive ? tab.activeIcon : tab.icon}
-                  size={15}
-                  color={isActive ? '#ffffff' : THEME.colors.primary}
-                />
-                <Text style={[styles.tabBtnText, isActive && styles.tabBtnTextActive]}>
-                  {tab.label}
-                </Text>
-                {badgeCount > 0 && (
-                  <View style={[styles.tabBadge, isActive && styles.tabBadgeActive]}>
-                    <Text style={[styles.tabBadgeText, isActive && styles.tabBadgeTextActive]}>{badgeCount}</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        <View style={styles.tabsContainer}>
+          <ScrollView
+            ref={tabsScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsScroll}
+          >
+            {PORTAL_TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const badgeCount =
+                tab.id === 'advances'
+                  ? pendingAdvancesCount
+                  : tab.id === 'leave'
+                  ? pendingLeavesCount
+                  : tab.id === 'justifications'
+                  ? pendingJustsCount
+                  : 0;
+
+              return (
+                <TouchableOpacity
+                  key={tab.id}
+                  style={[styles.tabBtn, isActive && styles.tabBtnActive]}
+                  onPress={() => setActiveTab(tab.id)}
+                  activeOpacity={0.75}
+                >
+                  <Ionicons
+                    name={isActive ? tab.activeIcon : tab.icon}
+                    size={15}
+                    color={isActive ? '#ffffff' : THEME.colors.primary}
+                  />
+                  <Text style={[styles.tabBtnText, isActive && styles.tabBtnTextActive]}>
+                    {tab.label}
+                  </Text>
+                  {badgeCount > 0 && (
+                    <View style={[styles.tabBadge, isActive && styles.tabBadgeActive]}>
+                      <Text style={[styles.tabBadgeText, isActive && styles.tabBadgeTextActive]}>{badgeCount}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.tabArrowBtn, activeTabIdx === PORTAL_TABS.length - 1 && styles.tabArrowBtnDisabled]}
+          onPress={handleNextTab}
+          disabled={activeTabIdx === PORTAL_TABS.length - 1}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={activeTabIdx === PORTAL_TABS.length - 1 ? '#cbd5e1' : THEME.colors.primary}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Active Tab Content */}
@@ -553,7 +605,33 @@ const styles = StyleSheet.create({
   },
 
   /* Segmented Nav Tabs */
+  tabsWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  tabArrowBtn: {
+    width: 32,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  tabArrowBtnDisabled: {
+    opacity: 0.35,
+    backgroundColor: '#f8fafc',
+    borderColor: '#e2e8f0',
+  },
   tabsContainer: {
+    flex: 1,
     backgroundColor: '#f1f5f9',
     padding: 4,
     borderRadius: 12,
