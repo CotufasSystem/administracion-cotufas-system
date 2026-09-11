@@ -27,8 +27,8 @@ export const ProjectsScreen = () => {
 
       <Card style={styles.kpiCard}>
         <View style={styles.kpiRow}>
-          <View>
-            <Text style={styles.kpiLabel}>Total Recaudación Mensual de Proyectos</Text>
+          <View style={styles.kpiTextBox}>
+            <Text style={styles.kpiLabel}>Recaudación Mensual Proyectos</Text>
             <Text style={styles.kpiValue}>{formatCurrency(totalRevenue)}</Text>
           </View>
           <View style={styles.kpiCountBadge}>
@@ -95,9 +95,10 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 2,
   },
-  kpiRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  kpiLabel: { color: THEME.colors.textDim, fontSize: 11.5, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.4 },
-  kpiValue: { color: THEME.colors.success, fontSize: 26, fontWeight: '900', letterSpacing: -0.5, marginTop: 4 },
-  kpiCountBadge: { backgroundColor: '#dcfce7', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 9999, borderWidth: 1, borderColor: '#bbf7d0' },
-  kpiCountText: { color: '#15803d', fontSize: 12, fontWeight: '800' },
+  kpiRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 },
+  kpiTextBox: { flex: 1, minWidth: 160 },
+  kpiLabel: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.4 },
+  kpiValue: { color: THEME.colors.success, fontSize: 24, fontWeight: '900', letterSpacing: -0.5, marginTop: 4 },
+  kpiCountBadge: { backgroundColor: '#dcfce7', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 9999, borderWidth: 1, borderColor: '#bbf7d0', alignSelf: 'center' },
+  kpiCountText: { color: '#15803d', fontSize: 11.5, fontWeight: '800' },
 });
