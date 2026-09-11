@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
   },
   typePillText: { fontSize: 11, fontWeight: '600', color: '#475569' },
-  datesRow: { flexDirection: 'row', gap: 8 },
+  datesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   textInput: {
     backgroundColor: '#f8fafc',
     borderWidth: 1,

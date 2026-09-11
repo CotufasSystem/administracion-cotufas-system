@@ -115,15 +115,18 @@ export const PortalJustificationsSection = ({ employee, attendance = {}, attenda
       {/* Pending Incidents List */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <View style={styles.cardTitleBox}>
-            <Text style={styles.cardTitle}>Inasistencias & Tardanzas Detectadas</Text>
-            <Text style={styles.cardSub}>Fechas registradas que requieren tu justificación</Text>
+          <View style={styles.cardTitleRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+              <Ionicons name="alert-circle-outline" size={17} color={THEME.colors.primary} />
+              <Text style={styles.cardTitle}>Faltas & Tardanzas</Text>
+            </View>
+            <View style={[styles.badgePill, pendingIncidents.length > 0 ? styles.badgePillWarning : styles.badgePillSuccess]}>
+              <Text style={[styles.badgePillText, pendingIncidents.length > 0 ? { color: '#d97706' } : { color: THEME.colors.success }]}>
+                {pendingIncidents.length} pendientes
+              </Text>
+            </View>
           </View>
-          <View style={[styles.badgePill, pendingIncidents.length > 0 ? styles.badgePillWarning : styles.badgePillSuccess]}>
-            <Text style={[styles.badgePillText, pendingIncidents.length > 0 ? { color: '#d97706' } : { color: THEME.colors.success }]}>
-              {pendingIncidents.length} pendientes
-            </Text>
-          </View>
+          <Text style={styles.cardSub}>Fechas registradas que requieren tu justificación</Text>
         </View>
 
         {pendingIncidents.length === 0 ? (
@@ -243,8 +246,10 @@ export const PortalJustificationsSection = ({ employee, attendance = {}, attenda
       {/* History of Submitted Justifications */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>Historial de Justificaciones Enviadas</Text>
-          <Text style={styles.cardSubCount}>{myJustifications.length} registradas</Text>
+          <View style={styles.cardTitleRow}>
+            <Text style={styles.cardTitle}>Historial de Justificaciones</Text>
+            <Text style={styles.cardSubCount}>{myJustifications.length} registradas</Text>
+          </View>
         </View>
 
         {myJustifications.length === 0 ? (
@@ -304,12 +309,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(37, 99, 235, 0.18)',
     gap: 10,
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 },
-  cardTitleBox: { flex: 1, minWidth: 160 },
+  cardHeader: { gap: 4, width: '100%' },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 },
   cardTitle: { color: THEME.colors.textMain, fontSize: 13.5, fontWeight: '800' },
   cardSub: { color: THEME.colors.textMuted, fontSize: 11, marginTop: 1 },
   cardSubCount: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '600' },
-  badgePill: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, borderWidth: 1 },
+  badgePill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1, alignSelf: 'center' },
   badgePillWarning: { backgroundColor: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)' },
   badgePillSuccess: { backgroundColor: 'rgba(22, 163, 74, 0.1)', borderColor: 'rgba(22, 163, 74, 0.3)' },
   badgePillText: { fontSize: 10.5, fontWeight: '800' },
