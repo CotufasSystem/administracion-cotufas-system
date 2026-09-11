@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../constants/theme';
@@ -17,12 +17,16 @@ export const AdvancesScreen = () => {
   const employeesWithAdvances = employees.filter(e => Number(e.advances) > 0);
   const totalAdvancesAmount = employeesWithAdvances.reduce((sum, e) => sum + Number(e.advances), 0);
 
-  const displayedEmployees = employees.filter(e => {
-    const hasAdvance = Number(e.advances) > 0;
-    if (filter === 'with_advance') return hasAdvance;
-    if (filter === 'no_advance') return !hasAdvance;
-    return true;
-  });
+  const displayedEmployees = useMemo(() => {
+    return employees
+      .filter(e => {
+        const hasAdvance = Number(e.advances) > 0;
+        if (filter === 'with_advance') return hasAdvance;
+        if (filter === 'no_advance') return !hasAdvance;
+        return true;
+      })
+      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' }));
+  }, [employees, filter]);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
