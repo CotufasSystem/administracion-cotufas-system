@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { StyleSheet, View, SafeAreaView, useWindowDimensions, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, SafeAreaView, useWindowDimensions, ActivityIndicator, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AppProvider, useApp } from './src/context/AppContext';
 import { getTheme } from './src/constants/theme';
@@ -18,13 +18,78 @@ import { FinanceScreen } from './src/screens/FinanceScreen';
 import { AgendaScreen } from './src/screens/AgendaScreen';
 import { RulesScreen } from './src/screens/RulesScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { useBadgeSync } from './src/hooks/useBadgeSync';
+
+const INJECTED_HOVER_STYLES = `
+  /* Framer Motion micro-interactions across ALL buttons */
+  [role="button"], 
+  button, 
+  a, 
+  .r-1loqt21,
+  [data-focusable="true"],
+  [style*="cursor: pointer"],
+  [style*="cursor:pointer"] {
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.2s ease !important;
+    cursor: pointer !important;
+  }
+  
+  /* Elevating upward movement and slight spring scale on hover */
+  [role="button"]:hover, 
+  button:hover, 
+  a:hover, 
+  .r-1loqt21:hover,
+  [data-focusable="true"]:hover,
+  [style*="cursor: pointer"]:hover,
+  [style*="cursor:pointer"]:hover {
+    transform: translateY(-2.5px) scale(1.02) !important;
+    filter: brightness(1.05);
+  }
+
+  /* Tactile spring press feedback when clicked */
+  [role="button"]:active, 
+  button:active, 
+  a:active, 
+  .r-1loqt21:active,
+  [data-focusable="true"]:active,
+  [style*="cursor: pointer"]:active,
+  [style*="cursor:pointer"]:active {
+    transform: translateY(1px) scale(0.96) !important;
+    transition-duration: 0.08s !important;
+  }
+
+  /* Prevent transform compounding inside nested buttons */
+  [role="button"] [role="button"],
+  .r-1loqt21 .r-1loqt21 {
+    transform: none !important;
+  }
+`;
 
 const MainLayout = () => {
   const { isAuthenticated, isLoaded, themeMode } = useApp();
+  useBadgeSync(); // Sincroniza el globo del icono automáticamente en tiempo real
   const [currentTab, setCurrentTab] = useState('dashboard');
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
   const currentTheme = getTheme(themeMode);
+
+  // Inject motion micro-interaction styles directly into DOM for web
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const styleId = 'cotufas-motion-interactions';
+      let styleTag = document.getElementById(styleId);
+      if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = styleId;
+        styleTag.type = 'text/css';
+        document.head.appendChild(styleTag);
+      }
+      styleTag.textContent = INJECTED_HOVER_STYLES;
+    }
+  }, []);
 
   if (!isLoaded) {
     return (
@@ -43,7 +108,7 @@ const MainLayout = () => {
       case 'dashboard': return 'Panel Principal';
       case 'payroll': return 'Nómina & Reparto Inteligente';
       case 'advances': return 'Control de Adelantos de Sueldo';
-      case 'employees': return 'Directorio de Empleados (A - Z)';
+      case 'employees': return 'Directorio de Empleados';
       case 'projects': return 'Proyectos de la Empresa & Clientes';
       case 'attendance': return 'Asistencia & Horarios';
       case 'finances': return 'Finanzas, Ingresos & Deudas';

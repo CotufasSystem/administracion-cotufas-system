@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ModalWrapper, CustomInput, PrimaryButton } from '../common/UIComponents';
 import { THEME } from '../../constants/theme';
 
@@ -99,19 +100,40 @@ export const AgendaModal = ({ visible, item, isNegotiation = false, onClose, onS
                 <TouchableOpacity
                   style={[styles.statusBtn, status === 'ongoing' && styles.statusBtnOngoing]}
                   onPress={() => setStatus('ongoing')}
+                  activeOpacity={0.8}
                 >
+                  <Ionicons
+                    name={status === 'ongoing' ? 'time' : 'time-outline'}
+                    size={14}
+                    color={status === 'ongoing' ? '#ffffff' : THEME.colors.textDim}
+                    style={{ marginRight: 4 }}
+                  />
                   <Text style={[styles.statusBtnText, status === 'ongoing' && styles.statusBtnTextActive]}>En Curso</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.statusBtn, status === 'won' && styles.statusBtnWon]}
                   onPress={() => setStatus('won')}
+                  activeOpacity={0.8}
                 >
+                  <Ionicons
+                    name={status === 'won' ? 'checkmark-circle' : 'checkmark-circle-outline'}
+                    size={14}
+                    color={status === 'won' ? '#ffffff' : THEME.colors.textDim}
+                    style={{ marginRight: 4 }}
+                  />
                   <Text style={[styles.statusBtnText, status === 'won' && styles.statusBtnTextActive]}>Ganada</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.statusBtn, status === 'lost' && styles.statusBtnLost]}
                   onPress={() => setStatus('lost')}
+                  activeOpacity={0.8}
                 >
+                  <Ionicons
+                    name={status === 'lost' ? 'close-circle' : 'close-circle-outline'}
+                    size={14}
+                    color={status === 'lost' ? '#ffffff' : THEME.colors.textDim}
+                    style={{ marginRight: 4 }}
+                  />
                   <Text style={[styles.statusBtnText, status === 'lost' && styles.statusBtnTextActive]}>Perdida</Text>
                 </TouchableOpacity>
               </View>
@@ -140,12 +162,38 @@ const styles = StyleSheet.create({
   content: { gap: THEME.spacing.sm },
   statusGroup: { marginBottom: THEME.spacing.sm },
   statusLabel: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '700', marginBottom: 6, textTransform: 'uppercase' },
-  statusButtons: { flexDirection: 'row', gap: 6 },
-  statusBtn: { flex: 1, paddingVertical: 8, backgroundColor: THEME.colors.bgDark, borderWidth: 1, borderColor: THEME.colors.border, borderRadius: THEME.radius.md, alignItems: 'center' },
-  statusBtnOngoing: { borderColor: THEME.colors.primary, backgroundColor: 'rgba(245, 158, 11, 0.15)' },
-  statusBtnWon: { borderColor: THEME.colors.success, backgroundColor: 'rgba(16, 185, 129, 0.15)' },
-  statusBtnLost: { borderColor: THEME.colors.danger, backgroundColor: 'rgba(239, 68, 68, 0.15)' },
-  statusBtnText: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '600' },
-  statusBtnTextActive: { color: '#ffffff', fontWeight: '800' },
+  statusButtons: { flexDirection: 'row', gap: 8 },
+  statusBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#ffffff',
+    borderWidth: 1.5,
+    borderColor: '#cbd5e1',
+    borderRadius: THEME.radius.md,
+  },
+  statusBtnOngoing: {
+    borderColor: '#d97706',
+    backgroundColor: '#f59e0b',
+  },
+  statusBtnWon: {
+    borderColor: '#059669',
+    backgroundColor: '#10b981',
+  },
+  statusBtnLost: {
+    borderColor: '#dc2626',
+    backgroundColor: '#ef4444',
+  },
+  statusBtnText: {
+    color: '#475569',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  statusBtnTextActive: {
+    color: '#ffffff',
+    fontWeight: '900',
+  },
   btnRow: { flexDirection: 'row', gap: THEME.spacing.md, marginTop: THEME.spacing.sm },
 });

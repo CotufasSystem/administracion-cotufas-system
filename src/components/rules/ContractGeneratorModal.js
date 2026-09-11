@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
@@ -9,6 +9,7 @@ import { COTUFAS_LOGO_DATA_URL } from '../../constants/logoDataUri';
 
 export const ContractGeneratorModal = ({ visible, onClose, employees = [] }) => {
   const { profileImage } = useApp();
+  const [searchEmp, setSearchEmp] = useState('');
   const [empName, setEmpName] = useState('');
   const [empIdCard, setEmpIdCard] = useState('');
   const [empPosition, setEmpPosition] = useState('');
@@ -16,10 +17,17 @@ export const ContractGeneratorModal = ({ visible, onClose, employees = [] }) => 
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [contractType, setContractType] = useState('Indefinido / Tiempo Completo');
 
+  const filteredEmployees = useMemo(() => {
+    if (!searchEmp.trim()) return employees;
+    const q = searchEmp.toLowerCase().trim();
+    return employees.filter(e => (e.name || '').toLowerCase().includes(q) || (e.idCard || '').toLowerCase().includes(q));
+  }, [employees, searchEmp]);
+
   const handleSelectEmp = (eId) => {
     const found = employees.find(e => e.id === eId);
     if (found) {
       setEmpName(found.name || '');
+      setEmpIdCard(found.idCard || '');
       setEmpPosition(found.area || 'Desarrollador / Operaciones');
       setEmpSalary(found.salary ? String(found.salary) : '');
     }
@@ -36,15 +44,18 @@ export const ContractGeneratorModal = ({ visible, onClose, employees = [] }) => 
   <title>Contrato de Trabajo - ${empName || 'Colaborador'}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Georgia", "Times New Roman", serif; color: #111827; }
-    body { padding: 40px; font-size: 13px; line-height: 1.6; }
-    .header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 24px; }
-    .title { font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-    .sub { font-size: 11px; color: #4b5563; text-transform: uppercase; margin-top: 4px; }
-    .content p { margin-bottom: 12px; text-align: justify; }
-    .clause { font-weight: bold; margin-top: 14px; margin-bottom: 4px; font-size: 13px; }
-    .signatures { display: flex; justify-content: space-between; margin-top: 60px; padding-top: 20px; }
-    .sig-box { width: 42%; text-align: center; border-top: 1px solid #111827; padding-top: 8px; font-size: 12px; }
-    @media print { body { padding: 10mm; } @page { margin: 15mm; } }
+    body { padding: 20px 26px; font-size: 11px; line-height: 1.4; }
+    .header { text-align: center; border-bottom: 1.5px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; }
+    .title { font-size: 13.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.8px; }
+    .sub { font-size: 9.5px; color: #4b5563; text-transform: uppercase; margin-top: 2px; }
+    .content p { margin-bottom: 8px; text-align: justify; }
+    .clause { font-weight: bold; margin-top: 8px; margin-bottom: 2px; font-size: 11px; }
+    .signatures { display: flex; justify-content: space-between; margin-top: 28px; padding-top: 10px; page-break-inside: avoid; }
+    .sig-box { width: 44%; text-align: center; border-top: 1px solid #111827; padding-top: 6px; font-size: 10.5px; line-height: 1.3; }
+    @media print {
+      @page { size: A4 portrait; margin: 8mm 10mm; }
+      body { padding: 0; }
+    }
   </style>
 </head>
 <body>
@@ -93,13 +104,48 @@ export const ContractGeneratorModal = ({ visible, onClose, employees = [] }) => 
       <ScrollView contentContainerStyle={styles.container}>
         {employees.length > 0 && (
           <View style={styles.quickEmpRow}>
-            <Text style={styles.label}>Cargar datos de empleado registrado:</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 4 }}>
-              {employees.map(e => (
-                <TouchableOpacity key={e.id} style={styles.empBadge} onPress={() => handleSelectEmp(e.id)}>
-                  <Text style={styles.empBadgeText}>{e.name}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={styles.label}>Cargar datos de empleado registrado ({filteredEmployees.length}):</Text>
+            </View>
+
+            {/* Search filter for workers */}
+            <View style={styles.searchBar}>
+              <Ionicons name="search-outline" size={15} color={THEME.colors.textDim} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Buscar trabajador por nombre o cédula..."
+                placeholderTextColor={THEME.colors.textDim}
+                value={searchEmp}
+                onChangeText={setSearchEmp}
+              />
+              {searchEmp ? (
+                <TouchableOpacity onPress={() => setSearchEmp('')}>
+                  <Ionicons name="close-circle" size={15} color={THEME.colors.textDim} />
                 </TouchableOpacity>
-              ))}
+              ) : null}
+            </View>
+
+            {/* Horizontal Scroll list with touch & mouse drag support */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={true}
+              contentContainerStyle={{ gap: 6, paddingVertical: 4 }}
+              keyboardShouldPersistTaps="handled"
+            >
+              {filteredEmployees.map(e => {
+                const isSelected = empName === e.name;
+                return (
+                  <TouchableOpacity
+                    key={e.id}
+                    style={[styles.empBadge, isSelected && styles.empBadgeActive]}
+                    onPress={() => handleSelectEmp(e.id)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="person" size={12} color={isSelected ? '#ffffff' : THEME.colors.primary} />
+                    <Text style={[styles.empBadgeText, isSelected && styles.empBadgeTextActive]}>{e.name}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
           </View>
         )}
@@ -137,7 +183,7 @@ export const ContractGeneratorModal = ({ visible, onClose, employees = [] }) => 
         </View>
 
         <TouchableOpacity style={styles.printBtn} onPress={handlePrintContract} activeOpacity={0.8}>
-          <Ionicons name="print" size={16} color="#000" />
+          <Ionicons name="print" size={16} color="#ffffff" />
           <Text style={styles.printBtnText}>Imprimir / Exportar Contrato en PDF</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -147,13 +193,17 @@ export const ContractGeneratorModal = ({ visible, onClose, employees = [] }) => 
 
 const styles = StyleSheet.create({
   container: { gap: 12, paddingBottom: 10 },
-  quickEmpRow: { gap: 4, backgroundColor: THEME.colors.bgDark, padding: 8, borderRadius: THEME.radius.md },
+  quickEmpRow: { gap: 8, backgroundColor: THEME.colors.bgDark, padding: 10, borderRadius: THEME.radius.md, borderWidth: 1, borderColor: THEME.colors.border },
   label: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
-  empBadge: { backgroundColor: THEME.colors.bgSurface, paddingHorizontal: 10, paddingVertical: 5, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: THEME.colors.border },
+  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: THEME.colors.border, paddingHorizontal: 10, gap: 6 },
+  searchInput: { flex: 1, fontSize: 12, color: THEME.colors.textMain, paddingVertical: 6, outlineStyle: 'none' },
+  empBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: THEME.colors.bgSurface, paddingHorizontal: 10, paddingVertical: 6, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: THEME.colors.border },
+  empBadgeActive: { backgroundColor: THEME.colors.primary, borderColor: THEME.colors.primary },
   empBadgeText: { color: THEME.colors.primary, fontSize: 12, fontWeight: '700' },
+  empBadgeTextActive: { color: '#ffffff' },
   formGroup: { gap: 4 },
   row: { flexDirection: 'row', gap: 10 },
   input: { backgroundColor: THEME.colors.bgDark, borderWidth: 1, borderColor: THEME.colors.border, borderRadius: THEME.radius.md, paddingHorizontal: 12, paddingVertical: 8, color: THEME.colors.textMain, fontSize: 13 },
   printBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: THEME.colors.primary, paddingVertical: 12, borderRadius: THEME.radius.md, marginTop: 8 },
-  printBtnText: { color: '#000000', fontSize: 13, fontWeight: '800' },
+  printBtnText: { color: '#ffffff', fontSize: 13, fontWeight: '800' },
 });

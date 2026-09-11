@@ -1,12 +1,11 @@
-import React, { useRef, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
-import { ProfileAvatar } from '../common/ProfileAvatar';
+import { COTUFAS_LOGO } from '../../constants/assets';
 
 export const EmployeePortalAuthView = ({
   activeEmployees = [],
-  selectedEmpId,
   onSelectEmp,
   supportsBiometrics,
   onBiometricAuth,
@@ -16,207 +15,309 @@ export const EmployeePortalAuthView = ({
   onPinAuth,
   authError,
 }) => {
-  const scrollRef = useRef(null);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredEmployees = useMemo(() => {
-    if (!searchQuery.trim()) return activeEmployees;
-    const q = searchQuery.toLowerCase().trim();
-    return activeEmployees.filter((emp) => (emp.name || '').toLowerCase().includes(q));
-  }, [activeEmployees, searchQuery]);
-
-  const handleScrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ x: 0, animated: true });
-    }
-  };
-
-  const handleScrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollToEnd({ animated: true });
-    }
-  };
-
+  const [identifier, setIdentifier] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [localError, setLocalError] = useState('');
+
+  const handleLogin = () => {
+    setLocalError('');
+    const q = identifier.trim().toLowerCase();
+    const pin = pinInput.trim();
+
+    if (!q) {
+      setLocalError('Por favor ingresa tu usuario, correo o cédula.');
+      return;
+    }
+    if (!pin) {
+      setLocalError('Por favor ingresa tu contraseña o cédula.');
+      return;
+    }
+
+    const cleanQ = q.replace(/[^0-9a-z]/g, '');
+
+    // Find the matching employee
+    const matched = activeEmployees.find((emp) => {
+      const u = (emp.portalUsername || '').trim().toLowerCase();
+      const n = (emp.name || '').trim().toLowerCase();
+      const ci = (emp.idCard || '').trim().toLowerCase().replace(/[^0-9a-z]/g, '');
+      const b = (emp.binance || '').trim().toLowerCase();
+      return u === q || n === q || b === q || (ci && cleanQ && ci.includes(cleanQ)) || u.includes(q) || n.includes(q);
+    });
+
+    if (!matched) {
+      setLocalError('No se encontró ningún colaborador con ese usuario o cédula.');
+      return;
+    }
+
+    // Set selected employee and execute auth
+    onSelectEmp(matched.id);
+    onPinAuth(matched);
+  };
+
+  const displayError = localError || authError;
 
   return (
-    <View style={styles.authBox}>
-      <View style={styles.lockBadge}>
-        <ProfileAvatar size={62} showBadge={false} />
+    <View style={styles.container}>
+      {/* Central App Brand Icon: Cotufas System Logo */}
+      <View style={styles.iconCircle}>
+        <Image
+          source={COTUFAS_LOGO}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
       </View>
-      <Text style={styles.authTitle}>
-        {supportsBiometrics ? "Acceso Biométrico / Privado" : "Acceso Seguro del Colaborador"}
-      </Text>
-      <Text style={styles.authSub}>
-        {supportsBiometrics
-          ? "Tus datos de sueldo, pagos y asistencias son confidenciales y solo tú puedes verlos."
-          : "Ingresa tu número de Cédula de Identidad o PIN personal para consultar tus datos y notificar asistencia."}
+
+      {/* Main Titles */}
+      <Text style={styles.title}>¡Bienvenido!</Text>
+      <Text style={styles.subTitle}>
+        Acceso privado al Portal de Asistencia Cotufas
       </Text>
 
-      <View style={styles.pickerSection}>
-        <View style={styles.pickerHeaderRow}>
-          <Text style={styles.sectionLabel}>
-            1. Selecciona Tu Nombre ({filteredEmployees.length}):
-          </Text>
-          {activeEmployees.length > 5 && (
-            <View style={styles.scrollControls}>
-              <TouchableOpacity style={styles.scrollArrowBtn} onPress={handleScrollLeft} activeOpacity={0.7}>
-                <Ionicons name="chevron-back" size={16} color={THEME.colors.primary} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.scrollArrowBtn} onPress={handleScrollRight} activeOpacity={0.7}>
-                <Ionicons name="chevron-forward" size={16} color={THEME.colors.primary} />
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-
-        {/* Quick Search Input */}
-        <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={15} color={THEME.colors.textDim} />
+      {/* Form Fields */}
+      <View style={styles.form}>
+        {/* Email / User / CI */}
+        <View style={styles.inputBox}>
           <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar por nombre..."
-            placeholderTextColor={THEME.colors.textDim}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+            style={styles.input}
+            placeholder="Usuario, Cédula o Correo"
+            placeholderTextColor="#94a3b8"
+            value={identifier}
+            onChangeText={(t) => {
+              setIdentifier(t);
+              setLocalError('');
+            }}
+            autoCapitalize="none"
+            autoCorrect={false}
           />
-          {searchQuery ? (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={15} color={THEME.colors.textDim} />
-            </TouchableOpacity>
-          ) : null}
         </View>
 
-        {/* Horizontal Names Scroll */}
-        <ScrollView
-          ref={scrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={true}
-          contentContainerStyle={styles.pickerScroll}
-          keyboardShouldPersistTaps="handled"
-        >
-          {filteredEmployees.map((emp) => {
-            const isSel = emp.id === selectedEmpId;
-            return (
-              <TouchableOpacity
-                key={emp.id}
-                style={[styles.empChip, isSel && styles.empChipActive]}
-                onPress={() => onSelectEmp(emp.id)}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="person" size={13} color={isSel ? "#ffffff" : THEME.colors.primary} />
-                <Text style={[styles.empChipText, isSel && styles.empChipTextActive]}>{emp.name}</Text>
-              </TouchableOpacity>
-            );
-          })}
-          {filteredEmployees.length === 0 && (
-            <Text style={styles.emptySearchText}>No se encontraron colaboradores con ese nombre.</Text>
-          )}
-        </ScrollView>
-      </View>
+        {/* Password / PIN */}
+        <View style={styles.inputBox}>
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña o Cédula"
+            placeholderTextColor="#94a3b8"
+            value={pinInput}
+            onChangeText={(t) => {
+              onChangePin(t);
+              setLocalError('');
+            }}
+            secureTextEntry={!showPassword}
+            onSubmitEditing={handleLogin}
+          />
+          <TouchableOpacity
+            style={styles.eyeBtn}
+            onPress={() => setShowPassword((prev) => !prev)}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={19}
+              color={showPassword ? '#2563eb' : '#94a3b8'}
+            />
+          </TouchableOpacity>
+        </View>
 
-      {selectedEmpId ? (
-        <View style={styles.bioActionBox}>
-          {supportsBiometrics && (
-            <>
-              <TouchableOpacity
-                style={[styles.bioScanBtn, isScanning && styles.bioScanBtnScanning]}
-                onPress={onBiometricAuth}
-                activeOpacity={0.85}
-                disabled={isScanning}
-              >
-                <Ionicons name={isScanning ? "scan" : "finger-print"} size={28} color="#ffffff" />
-                <View style={{ alignItems: 'flex-start' }}>
-                  <Text style={styles.bioScanBtnTitle}>
-                    {isScanning ? "Leyendo Huella / Face ID..." : "Ingresar con Huella o Face ID"}
-                  </Text>
-                  <Text style={styles.bioScanBtnSub}>Toca para autenticar con tu sensor móvil</Text>
-                </View>
-              </TouchableOpacity>
-
-              <View style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>o con tu Cédula / PIN</Text>
-                <View style={styles.dividerLine} />
-              </View>
-            </>
-          )}
-
-          {!supportsBiometrics && (
-            <Text style={styles.sectionLabel}>2. Ingresa tu Cédula o PIN:</Text>
-          )}
-
-          <View style={styles.pinInputRow}>
-            <View style={styles.pinInputWrapper}>
-              <TextInput
-                style={styles.pinInputField}
-                placeholder="Número de Cédula o PIN"
-                value={pinInput}
-                onChangeText={onChangePin}
-                placeholderTextColor={THEME.colors.textDim}
-                secureTextEntry={!showPassword}
-                autoFocus={!supportsBiometrics}
-                onSubmitEditing={onPinAuth}
-              />
-              <TouchableOpacity
-                style={styles.eyeBtn}
-                onPress={() => setShowPassword((prev) => !prev)}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={19}
-                  color={showPassword ? THEME.colors.primary : THEME.colors.textMuted}
-                />
-              </TouchableOpacity>
+        {/* Options Row: Remember me */}
+        <View style={styles.optionsRow}>
+          <TouchableOpacity
+            style={styles.checkboxRow}
+            onPress={() => setRememberMe(!rememberMe)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+              {rememberMe && <Ionicons name="checkmark" size={13} color="#ffffff" />}
             </View>
-
-            <TouchableOpacity style={styles.pinSubmitBtn} onPress={onPinAuth} activeOpacity={0.8}>
-              <Ionicons name="log-in-outline" size={16} color="#ffffff" style={{ marginRight: 4 }} />
-              <Text style={styles.pinSubmitBtnText}>Acceder</Text>
-            </TouchableOpacity>
-          </View>
+            <Text style={styles.checkboxLabel}>Recordarme</Text>
+          </TouchableOpacity>
         </View>
-      ) : null}
 
-      {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
+        {/* Error Feedback */}
+        {displayError ? (
+          <View style={styles.errorBox}>
+            <Ionicons name="alert-circle" size={16} color={THEME.colors.danger} />
+            <Text style={styles.errorText}>{displayError}</Text>
+          </View>
+        ) : null}
+
+        {/* Action Button (Remote style) */}
+        <TouchableOpacity
+          style={[styles.loginBtn, (!identifier.trim() || !pinInput.trim()) && styles.loginBtnDisabled]}
+          onPress={handleLogin}
+          activeOpacity={0.85}
+          disabled={!identifier.trim() || !pinInput.trim()}
+        >
+          <Text style={styles.loginBtnText}>Iniciar Sesión</Text>
+        </TouchableOpacity>
+
+        {/* Biometric Option */}
+        {supportsBiometrics && (
+          <TouchableOpacity
+            style={styles.bioBtn}
+            onPress={onBiometricAuth}
+            activeOpacity={0.8}
+            disabled={isScanning}
+          >
+            <Ionicons name={isScanning ? 'scan' : 'finger-print'} size={18} color="#2563eb" />
+            <Text style={styles.bioBtnText}>
+              {isScanning ? 'Verificando biométrico...' : 'Ingresar con Huella / Face ID'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  authBox: { alignItems: 'center', backgroundColor: '#ffffff', padding: 18, borderRadius: THEME.radius.lg, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.18)', gap: 12 },
-  lockBadge: { width: 68, height: 68, borderRadius: 34, backgroundColor: 'rgba(37, 99, 235, 0.1)', justifyContent: 'center', alignItems: 'center' },
-  authTitle: { color: THEME.colors.textMain, fontSize: 17, fontWeight: '900', textAlign: 'center' },
-  authSub: { color: THEME.colors.textMuted, fontSize: 12, textAlign: 'center', paddingHorizontal: 16 },
-  pickerSection: { width: '100%', gap: 8, marginTop: 4 },
-  pickerHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sectionLabel: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
-  scrollControls: { flexDirection: 'row', gap: 4 },
-  scrollArrowBtn: { width: 26, height: 26, borderRadius: 6, backgroundColor: 'rgba(37, 99, 235, 0.1)', justifyContent: 'center', alignItems: 'center' },
-  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: THEME.radius.md, paddingHorizontal: 10, paddingVertical: 6, gap: 6 },
-  searchInput: { flex: 1, color: THEME.colors.textMain, fontSize: 12, fontWeight: '600', padding: 0 },
-  pickerScroll: { gap: 8, paddingVertical: 6 },
-  empChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#f8fafc', paddingHorizontal: 14, paddingVertical: 9, borderRadius: THEME.radius.md, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.2)' },
-  empChipActive: { backgroundColor: THEME.colors.primary, borderColor: THEME.colors.primary },
-  empChipText: { color: THEME.colors.textMain, fontSize: 12, fontWeight: '700' },
-  empChipTextActive: { color: '#ffffff', fontWeight: '900' },
-  emptySearchText: { color: THEME.colors.textDim, fontSize: 12, fontStyle: 'italic', paddingVertical: 8 },
-  bioActionBox: { width: '100%', gap: 10, marginTop: 8 },
-  bioScanBtn: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: THEME.colors.primary, padding: 14, borderRadius: THEME.radius.md, justifyContent: 'center' },
-  bioScanBtnScanning: { backgroundColor: THEME.colors.warning },
-  bioScanBtnTitle: { color: '#ffffff', fontSize: 14, fontWeight: '900' },
-  bioScanBtnSub: { color: 'rgba(255, 255, 255, 0.85)', fontSize: 10 },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 2 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#e2e8f0' },
-  dividerText: { color: THEME.colors.textDim, fontSize: 10, fontWeight: '700' },
-  pinInputRow: { flexDirection: 'row', gap: 8, alignItems: 'stretch' },
-  pinInputWrapper: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: THEME.radius.md, paddingHorizontal: 12 },
-  pinInputField: { flex: 1, paddingVertical: 10, color: THEME.colors.textMain, fontSize: 13, fontWeight: '700' },
-  eyeBtn: { padding: 6, justifyContent: 'center', alignItems: 'center' },
-  pinSubmitBtn: { flexDirection: 'row', backgroundColor: THEME.colors.primary, paddingHorizontal: 18, justifyContent: 'center', alignItems: 'center', borderRadius: THEME.radius.md },
-  pinSubmitBtnText: { color: '#ffffff', fontSize: 13, fontWeight: '800' },
-  errorText: { color: THEME.colors.danger, fontSize: 12, fontWeight: '700', textAlign: 'center' },
+  container: {
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    paddingBottom: 24,
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+  },
+  iconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: 'rgba(37, 99, 235, 0.2)',
+    overflow: 'hidden',
+    padding: 6,
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 6,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  subTitle: {
+    fontSize: 13,
+    color: '#64748b',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  form: {
+    width: '100%',
+    gap: 14,
+  },
+  inputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderWidth: 1.5,
+    borderColor: '#cbd5e1',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    height: 50,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: '#0f172a',
+    paddingVertical: 10,
+  },
+  eyeBtn: {
+    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: '#94a3b8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+  },
+  checkboxChecked: {
+    backgroundColor: '#2563eb',
+    borderColor: '#2563eb',
+  },
+  checkboxLabel: {
+    fontSize: 13,
+    color: '#475569',
+    fontWeight: '500',
+  },
+  helpLink: {
+    fontSize: 12,
+    color: '#2563eb',
+    fontWeight: '600',
+  },
+  loginBtn: {
+    backgroundColor: '#2563eb', // Azul vibrante similar al botón "Log in" de Remote
+    borderRadius: 24, // Bordes redondeados elegantes como en la imagen
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 6,
+  },
+  loginBtnDisabled: {
+    opacity: 0.5,
+  },
+  loginBtnText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  bioBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginTop: 2,
+  },
+  bioBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2563eb',
+  },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
+  errorText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: THEME.colors.danger,
+    flex: 1,
+  },
 });
 
 

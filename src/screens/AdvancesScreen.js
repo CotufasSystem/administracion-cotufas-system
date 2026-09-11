@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../constants/theme';
@@ -56,7 +56,7 @@ export const AdvancesScreen = () => {
       </View>
 
       {/* Employees Advance Cards List */}
-      <Card title="Listado de Empleados (A - Z)" icon="card-outline">
+      <Card title="Listado de Empleados" icon="card-outline">
         {displayedEmployees.map((emp) => {
           const hasAdvance = Number(emp.advances) > 0;
           const history = Array.isArray(emp.advancesHistory) && emp.advancesHistory.length > 0 ? emp.advancesHistory : [];

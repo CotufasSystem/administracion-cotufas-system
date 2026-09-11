@@ -50,7 +50,10 @@ export const AttendanceRow = ({ employee, record, onStatusChange, onValidate }) 
     <View style={[styles.row, isPending && styles.rowPending]}>
       <View style={styles.empInfo}>
         <View style={styles.nameBox}>
-          <Text style={styles.name}>{employee.name}</Text>
+          <Text style={styles.name}>{employee.portalUsername || employee.name}</Text>
+          {employee.portalUsername && employee.portalUsername !== employee.name && (
+            <Text style={styles.legalSubName}>({employee.name})</Text>
+          )}
           {isPending && (
             <View style={styles.pendingBadge}>
               <Ionicons name="time" size={12} color={THEME.colors.warning} />
@@ -173,31 +176,62 @@ export const AttendanceRow = ({ employee, record, onStatusChange, onValidate }) 
 };
 
 const styles = StyleSheet.create({
-  row: { backgroundColor: 'rgba(37, 99, 235, 0.08)', borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.18)', borderRadius: THEME.radius.md, padding: 12, marginBottom: 8, gap: 8 },
-  rowPending: { borderColor: THEME.colors.warning, backgroundColor: 'rgba(245, 158, 11, 0.08)' },
-  empInfo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 },
-  nameBox: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  name: { color: THEME.colors.textMain, fontSize: 15, fontWeight: '700' },
-  pendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(245, 158, 11, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: THEME.radius.sm },
-  pendingBadgeText: { color: THEME.colors.warning, fontSize: 10, fontWeight: '800' },
-  timeBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(16, 185, 129, 0.1)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.25)' },
-  timeBadgeText: { color: THEME.colors.success, fontSize: 10, fontWeight: '700' },
-  customBadge: { backgroundColor: 'rgba(245, 158, 11, 0.15)', borderWidth: 1, borderColor: THEME.colors.primary, paddingHorizontal: 6, paddingVertical: 1, borderRadius: THEME.radius.sm },
+  row: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.9)',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    gap: 10,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  rowPending: {
+    borderColor: '#f59e0b',
+    backgroundColor: '#fffdf5',
+    shadowColor: '#f59e0b',
+    shadowOpacity: 0.1,
+  },
+  empInfo: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
+  nameBox: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  name: { color: THEME.colors.textMain, fontSize: 14.5, fontWeight: '800' },
+  legalSubName: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '500' },
+  pendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#fef3c7', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6, borderWidth: 1, borderColor: '#fde68a' },
+  pendingBadgeText: { color: '#b45309', fontSize: 10, fontWeight: '800' },
+  timeBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#ecfdf5', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6, borderWidth: 1, borderColor: '#a7f3d0' },
+  timeBadgeText: { color: '#047857', fontSize: 10, fontWeight: '700' },
+  customBadge: { backgroundColor: 'rgba(37, 99, 235, 0.1)', borderWidth: 1, borderColor: THEME.colors.primary, paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6 },
   customBadgeText: { color: THEME.colors.primary, fontSize: 9, fontWeight: '800' },
   actionsRight: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  validateBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: THEME.colors.success, paddingHorizontal: 8, paddingVertical: 4, borderRadius: THEME.radius.sm },
+  validateBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: THEME.colors.success, paddingHorizontal: 9, paddingVertical: 5, borderRadius: 6 },
   validateBtnText: { color: '#ffffff', fontSize: 11, fontWeight: '800' },
-  scheduleBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#ffffff', paddingHorizontal: 8, paddingVertical: 4, borderRadius: THEME.radius.sm, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.2)' },
-  scheduleText: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '600' },
-  scheduleTextCustom: { color: THEME.colors.primary, fontWeight: '700' },
+  scheduleBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#f8fafc', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 6, borderWidth: 1, borderColor: '#e2e8f0' },
+  scheduleText: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '700' },
+  scheduleTextCustom: { color: THEME.colors.primary, fontWeight: '800' },
   editBox: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  inputField: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: THEME.colors.primary, color: THEME.colors.textMain, fontSize: 12, fontWeight: '700', paddingHorizontal: 8, paddingVertical: 3, borderRadius: THEME.radius.sm, minWidth: 150 },
+  inputField: { backgroundColor: '#ffffff', borderWidth: 1.5, borderColor: THEME.colors.primary, color: THEME.colors.textMain, fontSize: 12, fontWeight: '700', paddingHorizontal: 9, paddingVertical: 4, borderRadius: 6, minWidth: 150, outlineStyle: 'none' },
   iconBtnAction: { padding: 3 },
   buttonsGroup: { flexDirection: 'row', gap: 6 },
-  optBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, backgroundColor: '#ffffff', borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.2)', paddingVertical: 6, paddingHorizontal: 6, borderRadius: THEME.radius.sm },
-  optText: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '600' },
-  optTextSelected: { color: '#000000', fontWeight: '800' },
-  permissionSection: { backgroundColor: 'rgba(56, 189, 248, 0.08)', borderWidth: 1, borderColor: 'rgba(56, 189, 248, 0.25)', borderRadius: THEME.radius.sm, padding: 6 },
+  optBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    borderRadius: 8,
+  },
+  optText: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '700' },
+  optTextSelected: { color: '#000000', fontWeight: '900' },
+  permissionSection: { backgroundColor: '#f0f9ff', borderWidth: 1, borderColor: '#bae6fd', borderRadius: 8, padding: 8 },
   permissionNoteBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  permissionNoteText: { flex: 1, color: THEME.colors.accent, fontSize: 11, fontWeight: '600' },
+  permissionNoteText: { flex: 1, color: THEME.colors.accent, fontSize: 11.5, fontWeight: '700' },
 });

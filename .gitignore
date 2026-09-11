@@ -14,3 +14,7 @@ npm-debug.*
 .env.local
 .env*.local
 .firebase/
+*.bak
+.agents/
+.claude/
+agent/

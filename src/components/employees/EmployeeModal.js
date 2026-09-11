@@ -16,6 +16,7 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
   const [area, setArea] = useState('');
   const [schedule, setSchedule] = useState('');
   const [pin, setPin] = useState('');
+  const [customPoints, setCustomPoints] = useState('');
   const [exemptAttendance, setExemptAttendance] = useState(false);
   const [selectedProjects, setSelectedProjects] = useState([]);
 
@@ -30,6 +31,7 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
       setArea(employee.area || 'Operaciones');
       setSchedule(employee.schedule || '9:00 AM - 5:00 PM');
       setPin(employee.pin || '');
+      setCustomPoints(employee.customPoints !== undefined && employee.customPoints !== null ? String(employee.customPoints) : '');
       setExemptAttendance(Boolean(employee.exemptAttendance));
       setSelectedProjects(employee.projectIds || []);
     } else {
@@ -42,6 +44,7 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
       setArea('Operaciones');
       setSchedule('9:00 AM - 5:00 PM');
       setPin('');
+      setCustomPoints('');
       setExemptAttendance(false);
       setSelectedProjects([]);
     }
@@ -68,6 +71,7 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
       area: area.trim(),
       schedule: schedule.trim(),
       pin: pin.trim(),
+      customPoints: Number(customPoints) || 0,
       exemptAttendance,
       projectIds: selectedProjects,
     });
@@ -174,6 +178,14 @@ export const EmployeeModal = ({ visible, employee, onClose, onSave }) => {
             />
           </View>
         </View>
+
+        <CustomInput
+          label="Puntos de Rendimiento / Méritos Extra"
+          placeholder="Ej: 50 (se suman a su ranking)"
+          keyboardType="numeric"
+          value={customPoints}
+          onChangeText={setCustomPoints}
+        />
 
         {/* Attendance Exemption Switch */}
         <View style={styles.switchRow}>

@@ -81,7 +81,7 @@ export const EmployeesScreen = () => {
 
       {/* Employees List */}
       <Card
-        title={searchQuery.trim() ? `Resultados de Búsqueda (${filteredEmployees.length})` : "Lista de Empleados (A - Z)"}
+        title={searchQuery.trim() ? `Resultados de Búsqueda (${filteredEmployees.length})` : "Lista de Empleados"}
         icon="people-outline"
       >
         {filteredEmployees.length > 0 ? (
@@ -129,6 +129,7 @@ export const EmployeesScreen = () => {
         payrollPayments={payrollPayments}
         employeeOfMonth={employeeOfMonth}
         onSaveEmployeeOfMonth={saveEmployeeOfMonth}
+        onSaveEmployee={saveEmployee}
       />
 
       <PinConfirmModal
@@ -143,9 +144,21 @@ export const EmployeesScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { padding: THEME.spacing.md, gap: THEME.spacing.md },
+  container: { padding: 18, gap: 14 },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 },
-  rankBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: THEME.colors.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: THEME.radius.md },
+  rankBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: THEME.colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 10,
+    shadowColor: THEME.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+  },
   rankBtnText: { color: '#ffffff', fontSize: 12, fontWeight: '800' },
   searchContainer: {
     flex: 1,
@@ -153,12 +166,16 @@ const styles = StyleSheet.create({
     maxWidth: 380,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: THEME.colors.bgCard,
-    borderWidth: 1,
-    borderColor: THEME.colors.border,
-    borderRadius: THEME.radius.md,
-    paddingHorizontal: 10,
-    height: 38,
+    backgroundColor: '#ffffff',
+    borderWidth: 1.5,
+    borderColor: '#e2e8f0',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 40,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
   },
   searchIcon: { marginRight: 8 },
   searchInput: {
@@ -168,10 +185,24 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     outlineStyle: 'none',
   },
-  summaryGrid: { flexDirection: 'row', gap: THEME.spacing.md, flexWrap: 'wrap' },
-  summaryCard: { flex: 1, minWidth: 160, marginBottom: 0, backgroundColor: 'rgba(37, 99, 235, 0.08)', borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.18)', borderRadius: THEME.radius.lg, padding: 14 },
-  summaryLabel: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '600' },
-  summaryValue: { fontSize: 20, fontWeight: '900', marginTop: 4 },
+  summaryGrid: { flexDirection: 'row', gap: 14, flexWrap: 'wrap' },
+  summaryCard: {
+    flex: 1,
+    minWidth: 160,
+    marginBottom: 0,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.9)',
+    borderRadius: 14,
+    padding: 16,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  summaryLabel: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.4 },
+  summaryValue: { fontSize: 22, fontWeight: '900', marginTop: 4, letterSpacing: -0.3 },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 24, gap: 8 },
   emptyText: { color: THEME.colors.textMuted, fontSize: 13, fontWeight: '600' },
 });

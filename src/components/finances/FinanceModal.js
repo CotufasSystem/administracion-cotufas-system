@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ModalWrapper, CustomInput, PrimaryButton } from '../common/UIComponents';
 import { THEME } from '../../constants/theme';
 
@@ -57,7 +58,14 @@ export const FinanceModal = ({ visible, type, onClose, onSave }) => {
               <TouchableOpacity
                 style={[styles.catBtn, category === 'debt_payable' && styles.catBtnDanger]}
                 onPress={() => setCategory('debt_payable')}
+                activeOpacity={0.8}
               >
+                <Ionicons
+                  name={category === 'debt_payable' ? 'arrow-up-circle' : 'arrow-up-circle-outline'}
+                  size={15}
+                  color={category === 'debt_payable' ? '#ffffff' : THEME.colors.textDim}
+                  style={{ marginRight: 5 }}
+                />
                 <Text style={[styles.catText, category === 'debt_payable' && styles.catTextActive]}>
                   Por Pagar (Pasivo)
                 </Text>
@@ -65,7 +73,14 @@ export const FinanceModal = ({ visible, type, onClose, onSave }) => {
               <TouchableOpacity
                 style={[styles.catBtn, category === 'debt_receivable' && styles.catBtnSuccess]}
                 onPress={() => setCategory('debt_receivable')}
+                activeOpacity={0.8}
               >
+                <Ionicons
+                  name={category === 'debt_receivable' ? 'arrow-down-circle' : 'arrow-down-circle-outline'}
+                  size={15}
+                  color={category === 'debt_receivable' ? '#ffffff' : THEME.colors.textDim}
+                  style={{ marginRight: 5 }}
+                />
                 <Text style={[styles.catText, category === 'debt_receivable' && styles.catTextActive]}>
                   Por Cobrar (Activo)
                 </Text>
@@ -121,29 +136,31 @@ const styles = StyleSheet.create({
   },
   catBtn: {
     flex: 1,
-    paddingVertical: 10,
-    backgroundColor: THEME.colors.bgDark,
-    borderWidth: 1,
-    borderColor: THEME.colors.border,
-    borderRadius: THEME.radius.md,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#ffffff',
+    borderWidth: 1.5,
+    borderColor: '#cbd5e1',
+    borderRadius: THEME.radius.md,
   },
   catBtnDanger: {
-    borderColor: THEME.colors.danger,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: '#dc2626',
+    backgroundColor: '#ef4444',
   },
   catBtnSuccess: {
-    borderColor: THEME.colors.success,
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: '#059669',
+    backgroundColor: '#10b981',
   },
   catText: {
-    color: THEME.colors.textMuted,
+    color: '#475569',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   catTextActive: {
     color: '#ffffff',
-    fontWeight: '800',
+    fontWeight: '900',
   },
   btnRow: {
     flexDirection: 'row',

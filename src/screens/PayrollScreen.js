@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
 import { THEME } from '../constants/theme';
 import { Card, PrimaryButton } from '../components/common/UIComponents';
@@ -194,7 +194,7 @@ export const PayrollScreen = () => {
         />
       </View>
 
-      <Card title="Desglose y Pago Individual por Empleado (A - Z)" icon="list-outline">
+      <Card title="Desglose y Pago Individual" icon="list-outline">
         {summaryData.rows.map((row) => {
           const recentPayment = (payrollPayments || []).find(p => p.empId === row.id && p.date === paymentDate);
           return (
@@ -226,5 +226,5 @@ export const PayrollScreen = () => {
 const styles = StyleSheet.create({
   container: { padding: THEME.spacing.md, gap: THEME.spacing.md },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' },
-  actionRowRight: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' },
+  actionRowRight: { flexDirection: 'row', justifyContent: 'stretch', alignItems: 'center', width: '100%' },
 });

@@ -8,7 +8,7 @@ import { EmployeePortalAuthView } from './EmployeePortalAuthView';
 import { EmployeePortalDetailView } from './EmployeePortalDetailView';
 
 export const EmployeePortalModal = ({ visible, onClose }) => {
-  const { employees = [], saveEmployee, attendance = {}, notifySelfAttendance, payrollPayments = [] } = useApp() || {};
+  const { employees = [], updateEmployeePortalProfile, attendance = {}, notifySelfAttendance, payrollPayments = [] } = useApp() || {};
   const activeEmployees = useMemo(
     () => (employees || []).filter((e) => e?.status !== 'inactive' && !e?.exemptAttendance && !e?.isOwner),
     [employees]
@@ -102,32 +102,38 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
     }
   };
 
-  const handlePinOrCiAuth = () => {
-    if (!targetEmployee) {
-      setAuthError('Selecciona tu nombre primero');
+  const handlePinOrCiAuth = (explicitEmployee = null) => {
+    const emp = explicitEmployee || targetEmployee;
+    if (!emp) {
+      setAuthError('No se encontró el colaborador.');
       return;
     }
     const cleanInput = pinInput.trim().toLowerCase().replace(/[^0-9a-z]/g, '');
-    const cleanCi = (targetEmployee.idCard || '').trim().toLowerCase().replace(/[^0-9a-z]/g, '');
-    const cleanPhone = (targetEmployee.phone || '').trim().replace(/[^0-9]/g, '').slice(-4);
-    const customPin = (targetEmployee.pin || '').trim().toLowerCase();
+    const cleanCi = (emp.idCard || '').trim().toLowerCase().replace(/[^0-9a-z]/g, '');
+    const cleanPhone = (emp.phone || '').trim().replace(/[^0-9]/g, '').slice(-4);
+    const customPin = (emp.pin || '').trim().toLowerCase();
 
     if (!cleanInput) {
       setAuthError('Por favor ingresa tu número de Cédula o PIN.');
       return;
     }
 
-    const isValid = (cleanCi && cleanInput === cleanCi) ||
-                    (customPin && cleanInput === customPin) ||
-                    (cleanPhone && cleanInput === cleanPhone) ||
-                    cleanInput === '1234';
+    // Si el usuario ya cambió su contraseña (emp.pin existe), SOLO puede entrar con su PIN.
+    // Si aún no ha configurado contraseña (emp.pin está vacío), entra con su Cédula.
+    let isValid = false;
+    if (customPin) {
+      isValid = cleanInput === customPin;
+    } else {
+      isValid = (cleanCi && cleanInput === cleanCi) || (cleanPhone && cleanInput === cleanPhone);
+    }
 
     if (isValid) {
-      setAuthenticatedEmpId(targetEmployee.id);
+      setAuthenticatedEmpId(emp.id);
+      setSelectedEmpId(emp.id);
       setPinInput('');
       setAuthError('');
     } else {
-      setAuthError('Cédula o PIN incorrecto para este colaborador.');
+      setAuthError('Cédula o contraseña incorrecta para este colaborador.');
     }
   };
 
@@ -148,11 +154,11 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
     else Alert.alert(`Hora de ${label} Registrada`, msg);
   };
 
-  const handleUpdatePassword = (newPin) => {
-    if (!authenticatedEmployee || !saveEmployee) return;
-    saveEmployee({
-      ...authenticatedEmployee,
-      pin: newPin,
+  const handleUpdateProfile = ({ portalUsername, pin }) => {
+    if (!authenticatedEmployee || !updateEmployeePortalProfile) return;
+    updateEmployeePortalProfile(authenticatedEmployee.id, {
+      portalUsername: portalUsername !== undefined ? portalUsername : authenticatedEmployee.portalUsername,
+      pin: pin !== undefined ? pin : authenticatedEmployee.pin,
     });
   };
 
@@ -160,10 +166,10 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
     <ModalWrapper
       visible={visible}
       onClose={onClose}
-      title={authenticatedEmployee ? `Mi Portal • ${authenticatedEmployee.name}` : "Acceso Seguro del Colaborador"}
-      maxWidth={620}
-      minHeight={580}
-      height={Platform.OS === 'web' ? '82vh' : 580}
+      title={authenticatedEmployee ? `Mi Portal • ${authenticatedEmployee.portalUsername || authenticatedEmployee.name}` : "Acceso al Portal"}
+      maxWidth={480}
+      minHeight={authenticatedEmployee ? 580 : 380}
+      height={authenticatedEmployee ? (Platform.OS === 'web' ? '82vh' : 580) : null}
     >
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 16 }}>
         {!authenticatedEmployee ? (
@@ -191,7 +197,7 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
             myPayments={myPayments}
             myMonthAttendance={myMonthAttendance}
             onNotifyAttendance={handleNotifyAttendance}
-            onUpdatePassword={handleUpdatePassword}
+            onUpdateProfile={handleUpdateProfile}
             onLogout={handleLogoutEmp}
           />
         )}

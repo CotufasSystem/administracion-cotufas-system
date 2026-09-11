@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
@@ -159,7 +159,10 @@ export const AttendanceReportModal = ({ visible, onClose, employees = [], attend
               return (
                 <View key={emp.id} style={styles.tableRow}>
                   <View style={styles.colEmployee}>
-                    <Text style={styles.empName}>{emp.name}</Text>
+                    <Text style={styles.empName}>{emp.portalUsername || emp.name}</Text>
+                    {emp.portalUsername && emp.portalUsername !== emp.name ? (
+                      <Text style={styles.empLegalSub} numberOfLines={1}>({emp.name})</Text>
+                    ) : null}
                     <Text style={styles.empArea} numberOfLines={1}>{emp.area || 'Operaciones'}</Text>
                   </View>
                   {weekDays.map(wd => (
@@ -206,7 +209,10 @@ export const AttendanceReportModal = ({ visible, onClose, employees = [], attend
               return (
                 <View key={emp.id} style={styles.tableRow}>
                   <View style={styles.colEmployee}>
-                    <Text style={styles.empName}>{emp.name}</Text>
+                    <Text style={styles.empName}>{emp.portalUsername || emp.name}</Text>
+                    {emp.portalUsername && emp.portalUsername !== emp.name ? (
+                      <Text style={styles.empLegalSub} numberOfLines={1}>({emp.name})</Text>
+                    ) : null}
                     <Text style={styles.empArea} numberOfLines={1}>{emp.area || 'Operaciones'}</Text>
                   </View>
                   {weekSummaries.map((ws, idx) => (
@@ -255,6 +261,7 @@ const styles = StyleSheet.create({
   tableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: THEME.colors.border, paddingVertical: 8, alignItems: 'center' },
   colEmployee: { flex: 2.2, paddingHorizontal: 8 },
   empName: { color: THEME.colors.textMain, fontSize: 13, fontWeight: '700' },
+  empLegalSub: { color: THEME.colors.textMuted, fontSize: 10, fontWeight: '500' },
   empArea: { color: THEME.colors.textDim, fontSize: 10 },
   colDay: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   colDayToday: { backgroundColor: 'rgba(245, 158, 11, 0.12)', borderRadius: THEME.radius.sm },

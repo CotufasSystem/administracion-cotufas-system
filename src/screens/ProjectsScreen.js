@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { THEME } from '../constants/theme';
 import { Card, PrimaryButton } from '../components/common/UIComponents';
@@ -80,12 +80,24 @@ export const ProjectsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { padding: THEME.spacing.md, gap: THEME.spacing.md },
+  container: { padding: 18, gap: 14 },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' },
-  kpiCard: { backgroundColor: THEME.colors.bgSurface, borderColor: THEME.colors.primaryDark, marginBottom: 0 },
+  kpiCard: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.9)',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 0,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
+  },
   kpiRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  kpiLabel: { color: THEME.colors.textMuted, fontSize: 12, fontWeight: '600' },
-  kpiValue: { color: THEME.colors.success, fontSize: 22, fontWeight: '900', marginTop: 4 },
-  kpiCountBadge: { backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: THEME.radius.full, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)' },
-  kpiCountText: { color: THEME.colors.success, fontSize: 12, fontWeight: '700' },
+  kpiLabel: { color: THEME.colors.textDim, fontSize: 11.5, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.4 },
+  kpiValue: { color: THEME.colors.success, fontSize: 26, fontWeight: '900', letterSpacing: -0.5, marginTop: 4 },
+  kpiCountBadge: { backgroundColor: '#dcfce7', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 9999, borderWidth: 1, borderColor: '#bbf7d0' },
+  kpiCountText: { color: '#15803d', fontSize: 12, fontWeight: '800' },
 });

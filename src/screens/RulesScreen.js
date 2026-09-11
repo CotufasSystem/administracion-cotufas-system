@@ -41,7 +41,7 @@ export const RulesScreen = () => {
   const handlePrintFormalPdf = () => {
     const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
     const effectiveLogo = profileImage || COTUFAS_LOGO_DATA_URL;
-    const logoHtml = effectiveLogo ? `<img src="${effectiveLogo}" alt="Logo" style="max-height: 60px; max-width: 140px; object-fit: contain; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;" />` : '';
+    const logoHtml = effectiveLogo ? `<img src="${effectiveLogo}" alt="Logo" style="max-height: 40px; max-width: 120px; object-fit: contain; margin-bottom: 4px; display: block; margin-left: auto; margin-right: auto;" />` : '';
 
     const html = `
 <!DOCTYPE html>
@@ -51,18 +51,21 @@ export const RulesScreen = () => {
   <title>Reglamento Interno de Trabajo - Cotufas System</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Georgia", "Times New Roman", serif; color: #0f172a; }
-    body { padding: 40px; font-size: 12px; line-height: 1.6; }
-    .header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 24px; }
-    .brand { font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-    .doc-title { font-size: 14px; font-weight: bold; text-transform: uppercase; color: #2563eb; margin-top: 4px; }
-    .meta { font-size: 11px; color: #64748b; margin-top: 4px; font-style: italic; }
-    .intro { margin-bottom: 20px; text-align: justify; font-size: 12px; }
-    .article { margin-bottom: 16px; text-align: justify; }
-    .article-title { font-size: 13px; font-weight: bold; color: #0f172a; margin-bottom: 4px; }
-    .article-body { font-size: 12px; color: #334155; }
-    .signatures { display: flex; justify-content: space-between; margin-top: 50px; padding-top: 20px; page-break-inside: avoid; }
-    .sig-box { width: 42%; text-align: center; border-top: 1px solid #0f172a; padding-top: 8px; font-size: 11px; }
-    @media print { body { padding: 10mm; } @page { margin: 15mm; } }
+    body { padding: 18px 24px; font-size: 10px; line-height: 1.35; }
+    .header { text-align: center; border-bottom: 1.5px solid #0f172a; padding-bottom: 6px; margin-bottom: 8px; }
+    .brand { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.8px; }
+    .doc-title { font-size: 11px; font-weight: bold; text-transform: uppercase; color: #2563eb; margin-top: 2px; }
+    .meta { font-size: 9px; color: #64748b; margin-top: 2px; font-style: italic; }
+    .intro { margin-bottom: 8px; text-align: justify; font-size: 9.5px; line-height: 1.3; }
+    .article { margin-bottom: 6px; text-align: justify; }
+    .article-title { font-size: 10px; font-weight: bold; color: #0f172a; margin-bottom: 1px; }
+    .article-body { font-size: 9.5px; color: #334155; line-height: 1.3; }
+    .signatures { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 10px; page-break-inside: avoid; }
+    .sig-box { width: 44%; text-align: center; border-top: 1px solid #0f172a; padding-top: 4px; font-size: 9.5px; line-height: 1.25; }
+    @media print {
+      @page { size: A4 portrait; margin: 8mm 10mm; }
+      body { padding: 0; }
+    }
   </style>
 </head>
 <body>

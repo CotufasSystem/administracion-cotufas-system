@@ -36,7 +36,18 @@ export const AppProvider = ({ children }) => {
         if (savedPin) setMasterPin(savedPin);
         const cached = await storage.getDatabase();
         if (cached) {
-          if (cached.employees) setEmployees(cached.employees);
+          if (cached.employees) {
+            const normalizedCached = cached.employees.map(emp => {
+              if (emp.idCard === 'V-28069293') {
+                return {
+                  ...emp,
+                  name: (!emp.name || emp.name === 'Clara' || emp.name === 'Clara Virginia') ? 'Clara Virginia Castillo Fariñas' : emp.name,
+                };
+              }
+              return emp;
+            });
+            setEmployees(normalizedCached);
+          }
           if (cached.projects) setProjects(cached.projects);
           if (cached.attendance) setAttendance(cached.attendance);
           if (cached.payroll) setPayrollPayments(cached.payroll);
@@ -60,7 +71,27 @@ export const AppProvider = ({ children }) => {
 
         collections.forEach(({ name, set }) => {
           unsubs.push(subscribeToCollection(name, (list) => {
-            if (list) { set([...list]); storage.saveDatabase({ [name]: list }); }
+            if (list) {
+              const normalized = name === 'employees'
+                ? list.map(emp => {
+                    const isClara = (emp.idCard && emp.idCard.replace(/[^0-9]/g, '').includes('28069293'));
+                    if (isClara) {
+                      const fullLegal = 'Clara Virginia Castillo Fariñas';
+                      // Mantener su nombre legal oficial en Firestore si venía incompleto
+                      if (!emp.name || emp.name === 'Clara' || emp.name === 'Clara Virginia') {
+                        saveEntityDoc('employees', emp.id, { ...emp, name: fullLegal });
+                      }
+                      return {
+                        ...emp,
+                        name: (!emp.name || emp.name === 'Clara' || emp.name === 'Clara Virginia') ? fullLegal : emp.name,
+                      };
+                    }
+                    return emp;
+                  })
+                : list;
+              set([...normalized]);
+              storage.saveDatabase({ [name]: normalized });
+            }
           }));
         });
 
@@ -133,6 +164,28 @@ export const AppProvider = ({ children }) => {
     });
     saveEntityDoc('employees', item.id, item);
   };
+
+  const updateEmployeePortalProfile = (empId, { portalUsername, pin }) => {
+    setEmployees(prev => {
+      const target = prev.find(e => e.id === empId);
+      if (!target) return prev;
+      const isClara = (target.idCard && target.idCard.replace(/[^0-9]/g, '').includes('28069293')) ||
+                      (target.name && target.name.toLowerCase().includes('clara'));
+      const officialName = isClara ? 'Clara Virginia Castillo Fariñas' : target.name;
+
+      const updated = {
+        ...target,
+        name: officialName,
+        portalUsername: portalUsername !== undefined ? portalUsername : target.portalUsername,
+        pin: pin !== undefined ? pin : target.pin,
+      };
+      const next = prev.map(e => e.id === empId ? updated : e);
+      storage.saveDatabase({ employees: next });
+      saveEntityDoc('employees', empId, updated);
+      return next;
+    });
+  };
+
   const deleteEmployee = (id) => {
     setEmployees(prev => {
       const next = prev.filter(e => e.id !== id);
@@ -246,7 +299,7 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      employees, saveEmployee, deleteEmployee, addAdvance, clearOrApplyAdvances,
+      employees, saveEmployee, updateEmployeePortalProfile, deleteEmployee, addAdvance, clearOrApplyAdvances,
       projects, saveProject, deleteProject, projectRestaurants, saveProjectRestaurant, deleteProjectRestaurant,
       attendance, setEmployeeAttendance, markAllAttendance, markGroupAttendance, notifySelfAttendance, validateAttendance, validateAllPendingAttendance,
       payrollPayments, recordPayrollPayment, deletePayrollPayment,

@@ -87,10 +87,12 @@ export const HeaderNotificationsModal = ({
                     <Text style={styles.alarmBarTitle}>🔔 Alarma de Recordatorios</Text>
                     <Text style={styles.alarmBarSub}>Avisa automáticamente 24 horas antes de cada evento</Text>
                   </View>
-                  <TouchableOpacity style={styles.chimeBtn} onPress={onPlayAlarm} activeOpacity={0.7}>
-                    <Ionicons name="volume-high" size={14} color="#ffffff" />
-                    <Text style={styles.chimeBtnText}>Probar Sonido</Text>
-                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+                    <TouchableOpacity style={styles.chimeBtn} onPress={onPlayAlarm} activeOpacity={0.7}>
+                      <Ionicons name="volume-high" size={14} color="#ffffff" />
+                      <Text style={styles.chimeBtnText}>Probar Sonido</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 {/* Tomorrow Events */}
@@ -216,6 +218,30 @@ export const HeaderNotificationsModal = ({
 
           {/* Footer */}
           <View style={styles.modalFooter}>
+            <TouchableOpacity
+              style={[styles.chimeBtn, { backgroundColor: '#3b82f6', marginRight: 'auto' }]}
+              onPress={async () => {
+                try {
+                  if (typeof Notification !== 'undefined') {
+                    const res = await Notification.requestPermission();
+                    if (res !== 'granted') {
+                      alert('Por favor autoriza las notificaciones en el navegador para activar el globo en el icono.');
+                      return;
+                    }
+                  }
+                  const { updateAppBadge } = require('../../services/badgeService');
+                  await updateAppBadge(5);
+                  alert('¡Prueba enviada! Revisa el icono de la app en tu pantalla o pestaña.');
+                } catch (e) {
+                  alert('Error al probar: ' + e.message);
+                }
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="notifications-circle" size={15} color="#ffffff" />
+              <Text style={styles.chimeBtnText}>Probar Globo (5)</Text>
+            </TouchableOpacity>
+
             {activeTab === 'attendance' && pendingAttendanceCount > 0 ? (
               <TouchableOpacity style={styles.validateAllBtn} onPress={onValidateAll} activeOpacity={0.8}>
                 <Ionicons name="checkmark-done" size={16} color="#ffffff" />

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../constants/theme';
@@ -14,7 +14,6 @@ export const AttendanceScreen = () => {
   const [selectedDate, setSelectedDate] = useState(() => getLocalDateString(new Date()));
   const [selectedProjectFilter, setSelectedProjectFilter] = useState('all');
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [isPortalModalVisible, setIsPortalModalVisible] = useState(false);
 
   const dayRecords = attendance[selectedDate] || {};
   const activeAttendanceEmployees = employees.filter(e => !e.exemptAttendance && e.status !== 'inactive');
@@ -65,13 +64,6 @@ export const AttendanceScreen = () => {
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
       <View style={styles.topBar}>
-        <PrimaryButton
-          title="Portal Colaboradores (Kiosco)"
-          icon="people-circle-outline"
-          variant="primary"
-          onPress={() => setIsPortalModalVisible(true)}
-          small
-        />
         <PrimaryButton
           title="Planilla Semanal / Mensual"
           icon="grid-outline"
@@ -192,11 +184,6 @@ export const AttendanceScreen = () => {
       <AttendanceReportModal
         visible={isReportModalVisible}
         onClose={() => setIsReportModalVisible(false)}
-      />
-
-      <EmployeePortalModal
-        visible={isPortalModalVisible}
-        onClose={() => setIsPortalModalVisible(false)}
       />
     </ScrollView>
   );

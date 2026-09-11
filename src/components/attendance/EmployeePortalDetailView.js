@@ -16,7 +16,7 @@ export const EmployeePortalDetailView = ({
   myPayments = [],
   myMonthAttendance,
   onNotifyAttendance,
-  onUpdatePassword,
+  onUpdateProfile,
   onLogout,
 }) => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -29,7 +29,10 @@ export const EmployeePortalDetailView = ({
     <View style={styles.container}>
       <View style={styles.empHeaderRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.empTitle}>{employee.name}</Text>
+          <Text style={styles.empTitle}>{employee.portalUsername || employee.name}</Text>
+          {employee.portalUsername && employee.portalUsername !== employee.name ? (
+            <Text style={styles.empCi}>Nombre Legal: {employee.name}</Text>
+          ) : null}
           <Text style={styles.empRole}>{employee.area || 'Operaciones'} • {employee.schedule || 'Horario regular'}</Text>
           {employee.idCard ? <Text style={styles.empCi}>CI: {employee.idCard}</Text> : null}
         </View>
@@ -38,10 +41,10 @@ export const EmployeePortalDetailView = ({
             style={[styles.passwordEmpBtn, isChangingPassword && styles.passwordEmpBtnActive]}
             onPress={() => setIsChangingPassword(!isChangingPassword)}
             activeOpacity={0.8}
-            title="Modificar Contraseña"
+            title="Modificar Nombre y Contraseña"
           >
-            <Ionicons name="key-outline" size={13} color={THEME.colors.primary} />
-            <Text style={styles.passwordEmpText}>Contraseña</Text>
+            <Ionicons name="person-outline" size={13} color={THEME.colors.primary} />
+            <Text style={styles.passwordEmpText}>Mi Perfil</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.logoutEmpBtn} onPress={onLogout} activeOpacity={0.8} title="Cerrar Sesión">
             <Ionicons name="log-out-outline" size={13} color={THEME.colors.danger} />
@@ -50,12 +53,12 @@ export const EmployeePortalDetailView = ({
         </View>
       </View>
 
-      {/* Change Password Section */}
+      {/* Change Profile & Password Section */}
       {isChangingPassword ? (
         <ChangePasswordSection
           employee={employee}
-          onSavePassword={(newPin) => {
-            onUpdatePassword?.(newPin);
+          onSaveProfile={(updatedData) => {
+            onUpdateProfile?.(updatedData);
           }}
           onClose={() => setIsChangingPassword(false)}
         />
