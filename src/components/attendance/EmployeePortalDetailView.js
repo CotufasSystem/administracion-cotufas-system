@@ -43,6 +43,51 @@ export const EmployeePortalDetailView = ({
   // Counts for tab badges
   const pendingAdvancesCount = (advanceRequests || []).filter(r => r.employeeId === employee.id && r.status === 'pending').length;
   const pendingLeavesCount = (leaveRequests || []).filter(r => r.employeeId === employee.id && r.status === 'under_review').length;
+  const pendingJustsCount = (attendanceJustifications || []).filter(j => j.employeeId === employee.id && j.status === 'pending').length;
+
+  // Recent resolved responses from Admin (Approved or Rejected)
+  const recentResolutions = useMemo(() => {
+    const list = [];
+    (advanceRequests || []).filter(r => r.employeeId === employee.id && (r.status === 'rejected' || r.status === 'approved')).forEach(r => {
+      list.push({
+        id: r.id,
+        type: 'advance',
+        status: r.status,
+        title: r.status === 'approved' ? `✅ Adelanto de $${r.amount} APROBADO` : `❌ Solicitud de Adelanto RECHAZADA ($${r.amount})`,
+        feedback: r.adminComment || (r.status === 'approved' ? 'El monto fue aprobado y añadido a tu balance.' : 'La administración no autorizó este adelanto.'),
+        date: r.resolvedAt || r.updatedAt,
+        targetTab: 'advances',
+      });
+    });
+
+    (leaveRequests || []).filter(l => l.employeeId === employee.id && (l.status === 'rejected' || l.status === 'approved')).forEach(l => {
+      list.push({
+        id: l.id,
+        type: 'leave',
+        status: l.status,
+        title: l.status === 'approved' ? `✅ Permiso/Reposo APROBADO` : `❌ Permiso/Reposo RECHAZADO`,
+        feedback: l.adminFeedback || (l.status === 'approved' ? 'Solicitud autorizada por Administración.' : 'Solicitud no autorizada.'),
+        date: l.resolvedAt || l.updatedAt,
+        targetTab: 'leave',
+      });
+    });
+
+    (attendanceJustifications || []).filter(j => j.employeeId === employee.id && (j.status === 'rejected' || j.status === 'approved')).forEach(j => {
+      list.push({
+        id: j.id,
+        type: 'justification',
+        status: j.status,
+        title: j.status === 'approved' ? `✅ Justificación APROBADA (${j.dateKey})` : `❌ Justificación RECHAZADA (${j.dateKey})`,
+        feedback: j.adminComment || (j.status === 'approved' ? 'Tu justificación fue aceptada.' : 'Justificación rechazada.'),
+        date: j.resolvedAt || j.updatedAt,
+        targetTab: 'justifications',
+      });
+    });
+
+    return list.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+  }, [advanceRequests, leaveRequests, attendanceJustifications, employee.id]);
+
+  const latestResolution = recentResolutions[0];
 
   return (
     <View style={styles.container}>
@@ -73,6 +118,38 @@ export const EmployeePortalDetailView = ({
         </View>
       </View>
 
+      {/* Admin Resolution Notification Banner (e.g. Rejected or Approved) */}
+      {latestResolution ? (
+        <TouchableOpacity
+          style={[
+            styles.notifAlertBanner,
+            latestResolution.status === 'rejected' ? styles.notifAlertDanger : styles.notifAlertSuccess
+          ]}
+          onPress={() => setActiveTab(latestResolution.targetTab)}
+          activeOpacity={0.85}
+        >
+          <View style={styles.notifAlertIconWrapper}>
+            <Ionicons
+              name={latestResolution.status === 'rejected' ? "alert-circle" : "checkmark-circle"}
+              size={22}
+              color={latestResolution.status === 'rejected' ? THEME.colors.danger : THEME.colors.success}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[
+              styles.notifAlertTitle,
+              { color: latestResolution.status === 'rejected' ? THEME.colors.danger : '#15803d' }
+            ]}>
+              {latestResolution.title}
+            </Text>
+            <Text style={styles.notifAlertSub} numberOfLines={2}>
+              {latestResolution.feedback}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={THEME.colors.textDim} />
+        </TouchableOpacity>
+      ) : null}
+
       {/* Change Profile & Password Section (Collapsible) */}
       {isChangingPassword ? (
         <ChangePasswordSection
@@ -89,7 +166,14 @@ export const EmployeePortalDetailView = ({
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
           {PORTAL_TABS.map((tab) => {
             const isActive = activeTab === tab.id;
-            const badgeCount = tab.id === 'advances' ? pendingAdvancesCount : (tab.id === 'leave' ? pendingLeavesCount : 0);
+            const badgeCount =
+              tab.id === 'advances'
+                ? pendingAdvancesCount
+                : tab.id === 'leave'
+                ? pendingLeavesCount
+                : tab.id === 'justifications'
+                ? pendingJustsCount
+                : 0;
 
             return (
               <TouchableOpacity
@@ -311,6 +395,43 @@ const styles = StyleSheet.create({
   passwordEmpText: { color: THEME.colors.primaryDark, fontSize: 11, fontWeight: '800' },
   logoutEmpBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(239, 68, 68, 0.1)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: THEME.radius.sm },
   logoutEmpText: { color: THEME.colors.danger, fontSize: 11, fontWeight: '800' },
+
+  /* Admin Notification Alert Banner */
+  notifAlertBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: THEME.radius.md,
+    borderWidth: 1.5,
+    gap: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  notifAlertDanger: {
+    backgroundColor: '#fff1f2',
+    borderColor: '#fca5a5',
+  },
+  notifAlertSuccess: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#86efac',
+  },
+  notifAlertIconWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notifAlertTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+  },
+  notifAlertSub: {
+    color: '#475569',
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: '500',
+  },
 
   /* Segmented Nav Tabs */
   tabsContainer: {

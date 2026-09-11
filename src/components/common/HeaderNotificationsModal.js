@@ -151,12 +151,12 @@ export const HeaderNotificationsModal = ({
                                 <Text style={styles.notifApproveText}>Aprobar</Text>
                               </TouchableOpacity>
                               <TouchableOpacity
-                                style={[styles.notifRejectBtn, { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 6, padding: 6 }]}
+                                style={styles.notifRejectActionBtn}
                                 onPress={() => onResolveAdvance?.(req, 'rejected')}
                                 activeOpacity={0.8}
-                                title="Rechazar"
                               >
-                                <Ionicons name="close-circle" size={16} color={THEME.colors.danger} />
+                                <Ionicons name="close-circle" size={14} color="#ffffff" />
+                                <Text style={styles.notifRejectActionText}>Rechazar</Text>
                               </TouchableOpacity>
                             </View>
                           </View>
@@ -207,12 +207,12 @@ export const HeaderNotificationsModal = ({
                                 <Text style={styles.notifApproveText}>Aprobar</Text>
                               </TouchableOpacity>
                               <TouchableOpacity
-                                style={[styles.notifRejectBtn, { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 6, padding: 6 }]}
+                                style={styles.notifRejectActionBtn}
                                 onPress={() => onResolveLeave?.(leave, 'rejected')}
                                 activeOpacity={0.8}
-                                title="Rechazar"
                               >
-                                <Ionicons name="close-circle" size={16} color={THEME.colors.danger} />
+                                <Ionicons name="close-circle" size={14} color="#ffffff" />
+                                <Text style={styles.notifRejectActionText}>Rechazar</Text>
                               </TouchableOpacity>
                             </View>
                           </View>
@@ -254,12 +254,12 @@ export const HeaderNotificationsModal = ({
                                 <Text style={styles.notifApproveText}>Aprobar</Text>
                               </TouchableOpacity>
                               <TouchableOpacity
-                                style={[styles.notifRejectBtn, { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 6, padding: 6 }]}
+                                style={styles.notifRejectActionBtn}
                                 onPress={() => onResolveJustification?.(just, 'rejected')}
                                 activeOpacity={0.8}
-                                title="Rechazar"
                               >
-                                <Ionicons name="close-circle" size={16} color={THEME.colors.danger} />
+                                <Ionicons name="close-circle" size={14} color="#ffffff" />
+                                <Text style={styles.notifRejectActionText}>Rechazar</Text>
                               </TouchableOpacity>
                             </View>
                           </View>
@@ -505,6 +505,8 @@ const styles = StyleSheet.create({
   notifItemActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   notifApproveBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: THEME.colors.success, paddingHorizontal: 10, paddingVertical: 6, borderRadius: THEME.radius.sm },
   notifApproveText: { color: '#ffffff', fontSize: 11, fontWeight: '800' },
+  notifRejectActionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: THEME.colors.danger, paddingHorizontal: 10, paddingVertical: 6, borderRadius: THEME.radius.sm },
+  notifRejectActionText: { color: '#ffffff', fontSize: 11, fontWeight: '800' },
   notifRejectBtn: { padding: 4 },
   emptyBox: { alignItems: 'center', justifyContent: 'center', paddingVertical: 28, gap: 6 },
   emptyTitle: { color: THEME.colors.textMain, fontSize: 13, fontWeight: '800' },
