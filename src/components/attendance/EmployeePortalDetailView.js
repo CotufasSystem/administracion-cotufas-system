@@ -10,7 +10,7 @@ import { PortalJustificationsSection } from './PortalJustificationsSection';
 
 const PORTAL_TABS = [
   { id: 'attendance', label: 'Asistencia', icon: 'time-outline', activeIcon: 'time' },
-  { id: 'ranking', label: 'Mi Puntuación ⭐', icon: 'star-outline', activeIcon: 'star' },
+  { id: 'ranking', label: 'Puntos', icon: 'star-outline', activeIcon: 'star' },
   { id: 'advances', label: 'Adelantos', icon: 'cash-outline', activeIcon: 'cash' },
   { id: 'leave', label: 'Permisos', icon: 'medkit-outline', activeIcon: 'medkit' },
   { id: 'justifications', label: 'Justificar', icon: 'shield-checkmark-outline', activeIcon: 'shield-checkmark' },
@@ -555,27 +555,25 @@ const styles = StyleSheet.create({
   /* Segmented Nav Tabs */
   tabsContainer: {
     backgroundColor: '#f1f5f9',
-    padding: 3,
-    borderRadius: 10,
+    padding: 4,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
   tabsScroll: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    gap: 2,
+    gap: 6,
+    paddingHorizontal: 2,
   },
   tabBtn: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 5,
     paddingVertical: 8,
-    paddingHorizontal: 6,
-    borderRadius: 7,
+    paddingHorizontal: 12,
+    borderRadius: 8,
     backgroundColor: 'transparent',
   },
   tabBtnActive: {
@@ -588,7 +586,7 @@ const styles = StyleSheet.create({
   },
   tabBtnText: {
     color: '#475569',
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
   },
   tabBtnTextActive: {
