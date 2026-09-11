@@ -10,15 +10,28 @@ export const HeaderNotificationsModal = ({
   tomorrowEvents = [],
   todayEvents = [],
   pendingAttendances = [],
+  pendingAdvanceRequests = [],
+  pendingLeaveRequests = [],
+  pendingJustifications = [],
   onValidateOne,
   onRejectOne,
   onValidateAll,
+  onResolveAdvance,
+  onResolveLeave,
+  onResolveJustification,
   onGoToAgenda,
   onPlayAlarm,
 }) => {
-  const [activeTab, setActiveTab] = useState(() =>
-    tomorrowEvents.length > 0 || todayEvents.length > 0 ? 'agenda' : 'attendance'
-  );
+  const pendingPortalRequestsCount =
+    (pendingAdvanceRequests?.length || 0) +
+    (pendingLeaveRequests?.length || 0) +
+    (pendingJustifications?.length || 0);
+
+  const [activeTab, setActiveTab] = useState(() => {
+    if (pendingPortalRequestsCount > 0) return 'portal';
+    if (tomorrowEvents.length > 0 || todayEvents.length > 0) return 'agenda';
+    return 'attendance';
+  });
 
   const totalAgendaReminders = tomorrowEvents.length + todayEvents.length;
   const pendingAttendanceCount = pendingAttendances.length;
@@ -36,7 +49,9 @@ export const HeaderNotificationsModal = ({
               <View>
                 <Text style={styles.modalTitle}>Centro de Notificaciones & Alarmas</Text>
                 <Text style={styles.notifSubTitle}>
-                  {totalAgendaReminders > 0
+                  {pendingPortalRequestsCount > 0
+                    ? `Tienes ${pendingPortalRequestsCount} solicitud(es) de empleados pendientes`
+                    : totalAgendaReminders > 0
                     ? `Tienes ${totalAgendaReminders} cita(s)/reunión(es) próximas`
                     : 'Cotufas System'}
                 </Text>
@@ -50,13 +65,29 @@ export const HeaderNotificationsModal = ({
           {/* Tab Selector */}
           <View style={styles.tabsRow}>
             <TouchableOpacity
+              style={[styles.tabBtn, activeTab === 'portal' && styles.tabBtnActive]}
+              onPress={() => setActiveTab('portal')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="document-text-outline" size={14} color={activeTab === 'portal' ? THEME.colors.primary : THEME.colors.textMuted} />
+              <Text style={[styles.tabText, activeTab === 'portal' && styles.tabTextActive]}>
+                Solicitudes ({pendingPortalRequestsCount})
+              </Text>
+              {pendingPortalRequestsCount > 0 && (
+                <View style={[styles.tabBadge, { backgroundColor: THEME.colors.primary }]}>
+                  <Text style={styles.tabBadgeText}>{pendingPortalRequestsCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={[styles.tabBtn, activeTab === 'agenda' && styles.tabBtnActive]}
               onPress={() => setActiveTab('agenda')}
               activeOpacity={0.8}
             >
               <Ionicons name="calendar-outline" size={14} color={activeTab === 'agenda' ? THEME.colors.primary : THEME.colors.textMuted} />
               <Text style={[styles.tabText, activeTab === 'agenda' && styles.tabTextActive]}>
-                Citas y Reuniones ({totalAgendaReminders})
+                Citas ({totalAgendaReminders})
               </Text>
               {tomorrowEvents.length > 0 && (
                 <View style={styles.tabBadge}>
@@ -78,6 +109,174 @@ export const HeaderNotificationsModal = ({
           </View>
 
           <ScrollView style={styles.contentScroll} showsVerticalScrollIndicator={true}>
+            {/* TAB: SOLICITUDES DEL PORTAL DE EMPLEADOS */}
+            {activeTab === 'portal' && (
+              <View style={styles.section}>
+                {pendingPortalRequestsCount > 0 ? (
+                  <>
+                    {/* 1. Solicitudes de Adelantos */}
+                    {pendingAdvanceRequests.length > 0 && (
+                      <View style={styles.group}>
+                        <View style={styles.groupHeaderRow}>
+                          <View style={[styles.badgeToday, { backgroundColor: '#10b981' }]}>
+                            <Ionicons name="cash-outline" size={13} color="#ffffff" />
+                            <Text style={styles.badgeTodayText}>ADELANTOS DE SUELDO ({pendingAdvanceRequests.length})</Text>
+                          </View>
+                        </View>
+                        {pendingAdvanceRequests.map((req) => (
+                          <View key={req.id} style={styles.portalReqCard}>
+                            <View style={styles.notifItemInfo}>
+                              <View style={styles.notifItemHeader}>
+                                <Text style={styles.notifItemName}>{req.employeeName || 'Colaborador'}</Text>
+                                <View style={[styles.notifTimeBadge, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
+                                  <Ionicons name="cash" size={12} color="#10b981" />
+                                  <Text style={[styles.notifTimeText, { color: '#047857', fontWeight: '800' }]}>
+                                    ${Number(req.amount).toFixed(2)} USD
+                                  </Text>
+                                </View>
+                              </View>
+                              <Text style={styles.notifItemDate}>
+                                Requerido para: {formatDate(req.requiredByDate) || req.requiredByDate} • C.I: {req.idCard || 'N/A'}
+                              </Text>
+                              {req.reason ? <Text style={styles.notifItemNote}>Motivo: {req.reason}</Text> : null}
+                            </View>
+
+                            <View style={styles.notifItemActions}>
+                              <TouchableOpacity
+                                style={[styles.notifApproveBtn, { backgroundColor: '#10b981' }]}
+                                onPress={() => onResolveAdvance?.(req, 'approved')}
+                                activeOpacity={0.8}
+                              >
+                                <Ionicons name="checkmark-circle" size={14} color="#ffffff" />
+                                <Text style={styles.notifApproveText}>Aprobar</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[styles.notifRejectBtn, { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 6, padding: 6 }]}
+                                onPress={() => onResolveAdvance?.(req, 'rejected')}
+                                activeOpacity={0.8}
+                                title="Rechazar"
+                              >
+                                <Ionicons name="close-circle" size={16} color={THEME.colors.danger} />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+
+                    {/* 2. Reposos y Permisos */}
+                    {pendingLeaveRequests.length > 0 && (
+                      <View style={styles.group}>
+                        <View style={styles.groupHeaderRow}>
+                          <View style={[styles.badgeToday, { backgroundColor: '#8b5cf6' }]}>
+                            <Ionicons name="medkit-outline" size={13} color="#ffffff" />
+                            <Text style={styles.badgeTodayText}>REPOSOS Y PERMISOS ({pendingLeaveRequests.length})</Text>
+                          </View>
+                        </View>
+                        {pendingLeaveRequests.map((leave) => (
+                          <View key={leave.id} style={styles.portalReqCard}>
+                            <View style={styles.notifItemInfo}>
+                              <View style={styles.notifItemHeader}>
+                                <Text style={styles.notifItemName}>{leave.employeeName || 'Colaborador'}</Text>
+                                <View style={[styles.notifTimeBadge, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
+                                  <Text style={[styles.notifTimeText, { color: '#6d28d9', fontWeight: '800' }]}>
+                                    {leave.businessDays || leave.totalDays} Días
+                                  </Text>
+                                </View>
+                              </View>
+                              <Text style={styles.notifItemDate}>
+                                Período: {formatDate(leave.startDate)} al {formatDate(leave.endDate)}
+                              </Text>
+                              {leave.description ? (
+                                <Text style={styles.notifItemNote}>Motivo: {leave.description}</Text>
+                              ) : null}
+                              {Array.isArray(leave.attachments) && leave.attachments.length > 0 ? (
+                                <Text style={[styles.notifItemNote, { color: THEME.colors.primary }]}>
+                                  📎 {leave.attachments.length} comprobante(s) adjunto(s)
+                                </Text>
+                              ) : null}
+                            </View>
+
+                            <View style={styles.notifItemActions}>
+                              <TouchableOpacity
+                                style={[styles.notifApproveBtn, { backgroundColor: '#8b5cf6' }]}
+                                onPress={() => onResolveLeave?.(leave, 'approved')}
+                                activeOpacity={0.8}
+                              >
+                                <Ionicons name="checkmark-circle" size={14} color="#ffffff" />
+                                <Text style={styles.notifApproveText}>Aprobar</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[styles.notifRejectBtn, { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 6, padding: 6 }]}
+                                onPress={() => onResolveLeave?.(leave, 'rejected')}
+                                activeOpacity={0.8}
+                                title="Rechazar"
+                              >
+                                <Ionicons name="close-circle" size={16} color={THEME.colors.danger} />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+
+                    {/* 3. Justificaciones de Inasistencia / Tardanza */}
+                    {pendingJustifications.length > 0 && (
+                      <View style={styles.group}>
+                        <View style={styles.groupHeaderRow}>
+                          <View style={[styles.badgeToday, { backgroundColor: '#f59e0b' }]}>
+                            <Ionicons name="warning-outline" size={13} color="#ffffff" />
+                            <Text style={styles.badgeTodayText}>JUSTIFICACIONES ({pendingJustifications.length})</Text>
+                          </View>
+                        </View>
+                        {pendingJustifications.map((just) => (
+                          <View key={just.id} style={styles.portalReqCard}>
+                            <View style={styles.notifItemInfo}>
+                              <View style={styles.notifItemHeader}>
+                                <Text style={styles.notifItemName}>{just.employeeName || 'Colaborador'}</Text>
+                                <View style={[styles.notifTimeBadge, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
+                                  <Text style={[styles.notifTimeText, { color: '#b45309', fontWeight: '800' }]}>
+                                    {just.incidentType === 'late_entry' ? 'Tardanza' : 'Falta'}
+                                  </Text>
+                                </View>
+                              </View>
+                              <Text style={styles.notifItemDate}>Fecha: {formatDate(just.dateKey)}</Text>
+                              <Text style={styles.notifItemNote}>Motivo: {just.reason}</Text>
+                            </View>
+
+                            <View style={styles.notifItemActions}>
+                              <TouchableOpacity
+                                style={[styles.notifApproveBtn, { backgroundColor: '#f59e0b' }]}
+                                onPress={() => onResolveJustification?.(just, 'approved')}
+                                activeOpacity={0.8}
+                              >
+                                <Ionicons name="checkmark-circle" size={14} color="#ffffff" />
+                                <Text style={styles.notifApproveText}>Aprobar</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[styles.notifRejectBtn, { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 6, padding: 6 }]}
+                                onPress={() => onResolveJustification?.(just, 'rejected')}
+                                activeOpacity={0.8}
+                                title="Rechazar"
+                              >
+                                <Ionicons name="close-circle" size={16} color={THEME.colors.danger} />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </>
+                ) : (
+                  <View style={styles.emptyBox}>
+                    <Ionicons name="checkmark-done-circle-outline" size={36} color={THEME.colors.success} />
+                    <Text style={styles.emptyTitle}>Sin Solicitudes Pendientes</Text>
+                    <Text style={styles.emptySub}>No hay solicitudes de adelantos, permisos ni justificaciones por revisar.</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
             {/* TAB 1: AGENDA Y CITAS DE MAÑANA / HOY */}
             {activeTab === 'agenda' && (
               <View style={styles.section}>
@@ -295,6 +494,7 @@ const styles = StyleSheet.create({
   actionLinkBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(37, 99, 235, 0.1)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: THEME.radius.sm },
   actionLinkText: { color: THEME.colors.primary, fontSize: 11, fontWeight: '700' },
   notifItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(37, 99, 235, 0.05)', padding: 10, borderRadius: THEME.radius.md, borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.18)', gap: 8 },
+  portalReqCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#ffffff', padding: 12, borderRadius: THEME.radius.md, borderWidth: 1, borderColor: '#e2e8f0', gap: 8, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3, elevation: 1 },
   notifItemInfo: { flex: 1, gap: 2 },
   notifItemHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   notifItemName: { color: THEME.colors.textMain, fontSize: 13, fontWeight: '800' },

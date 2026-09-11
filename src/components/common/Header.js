@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
@@ -7,6 +7,7 @@ import { useAgendaReminders } from '../../hooks/useAgendaReminders';
 import { HeaderNotificationsModal } from './HeaderNotificationsModal';
 import { HeaderMobileMenuModal } from './HeaderMobileMenuModal';
 import { updateAppBadge } from '../../services/badgeService';
+import { resolveAdvanceRequest, resolveLeaveRequest, resolveAttendanceJustification } from '../../services/portalService';
 
 export const Header = ({ title, subtitle, currentTab, onSelectTab }) => {
   const {
@@ -15,9 +16,13 @@ export const Header = ({ title, subtitle, currentTab, onSelectTab }) => {
     attendance = {},
     agenda = [],
     negotiations = [],
+    advanceRequests = [],
+    leaveRequests = [],
+    attendanceJustifications = [],
     validateAttendance,
     validateAllPendingAttendance,
     setEmployeeAttendance,
+    addAdvance,
   } = useApp();
 
   const { width } = useWindowDimensions();
@@ -53,9 +58,25 @@ export const Header = ({ title, subtitle, currentTab, onSelectTab }) => {
     return list;
   }, [attendance, employees]);
 
+  // Pending Employee Portal Requests
+  const pendingAdvanceRequests = useMemo(() => {
+    return (advanceRequests || []).filter((r) => r.status === 'pending');
+  }, [advanceRequests]);
+
+  const pendingLeaveRequests = useMemo(() => {
+    return (leaveRequests || []).filter((l) => l.status === 'under_review');
+  }, [leaveRequests]);
+
+  const pendingJustifications = useMemo(() => {
+    return (attendanceJustifications || []).filter((j) => j.status === 'pending');
+  }, [attendanceJustifications]);
+
+  const pendingPortalRequestsCount =
+    pendingAdvanceRequests.length + pendingLeaveRequests.length + pendingJustifications.length;
+
   const pendingCount = pendingAttendances.length;
   const hasTomorrowAlarm = tomorrowEvents.length > 0;
-  const totalAlertsCount = pendingCount + totalRemindersCount;
+  const totalAlertsCount = pendingCount + totalRemindersCount + pendingPortalRequestsCount;
 
   // Actualizar el globo con el número de notificaciones en el icono de la app / inicio
   React.useEffect(() => {
@@ -72,6 +93,82 @@ export const Header = ({ title, subtitle, currentTab, onSelectTab }) => {
     const uniqueDates = Array.from(new Set(pendingAttendances.map((p) => p.dateKey)));
     uniqueDates.forEach((d) => validateAllPendingAttendance(d));
     setIsNotificationsOpen(false);
+  };
+
+  const handleResolveAdvance = async (req, action) => {
+    try {
+      if (action === 'approved') {
+        await resolveAdvanceRequest({
+          requestId: req.id,
+          status: 'approved',
+          adminComment: 'Aprobado desde Centro de Notificaciones',
+        });
+        // Immediatly record the advance on the employee's balance!
+        addAdvance(
+          req.employeeId,
+          req.amount,
+          req.reason || 'Adelanto solicitado desde autoservicio',
+          req.requiredByDate
+        );
+        alert(`¡Adelanto de $${req.amount} para ${req.employeeName || 'el colaborador'} aprobado y cargado a su nómina!`);
+      } else {
+        const comment = (typeof window !== 'undefined' ? window.prompt('Motivo del rechazo (opcional):') : '') || 'Solicitud rechazada';
+        await resolveAdvanceRequest({
+          requestId: req.id,
+          status: 'rejected',
+          adminComment: comment,
+        });
+        alert('Solicitud de adelanto rechazada.');
+      }
+    } catch (err) {
+      alert('Error al resolver la solicitud: ' + (err.message || err));
+    }
+  };
+
+  const handleResolveLeave = async (leave, action) => {
+    try {
+      if (action === 'approved') {
+        await resolveLeaveRequest({
+          requestId: leave.id,
+          status: 'approved',
+          adminFeedback: 'Aprobado por Administración',
+        });
+        alert(`Permiso / reposo de ${leave.employeeName} aprobado.`);
+      } else {
+        const reason = (typeof window !== 'undefined' ? window.prompt('Motivo del rechazo (opcional):') : '') || 'No procede';
+        await resolveLeaveRequest({
+          requestId: leave.id,
+          status: 'rejected',
+          adminFeedback: reason,
+        });
+        alert('Permiso / reposo rechazado.');
+      }
+    } catch (err) {
+      alert('Error: ' + (err.message || err));
+    }
+  };
+
+  const handleResolveJustification = async (just, action) => {
+    try {
+      if (action === 'approved') {
+        await resolveAttendanceJustification({
+          justificationId: just.id,
+          status: 'approved',
+          adminComment: 'Justificación aceptada',
+        });
+        alert(`Justificación de ${just.employeeName} para el día ${just.dateKey} aceptada.`);
+      } else {
+        const reason = (typeof window !== 'undefined' ? window.prompt('Motivo del rechazo (opcional):') : '') || 'No justificado';
+        await resolveAttendanceJustification({
+          justificationId: just.id,
+          status: 'rejected',
+          adminComment: reason,
+        });
+        alert('Justificación rechazada.');
+      }
+    } catch (err) {
+      alert('Error: ' + (err.message || err));
+    }
   };
 
   return (
@@ -109,7 +206,7 @@ export const Header = ({ title, subtitle, currentTab, onSelectTab }) => {
             style={[
               styles.notifBtn,
               isSmall && styles.iconBtnCompact,
-              hasTomorrowAlarm ? styles.notifBtnAlarm : (pendingCount > 0 ? styles.notifBtnActive : null),
+              hasTomorrowAlarm ? styles.notifBtnAlarm : (totalAlertsCount > 0 ? styles.notifBtnActive : null),
             ]}
             onPress={() => setIsNotificationsOpen(true)}
             activeOpacity={0.8}
@@ -119,7 +216,7 @@ export const Header = ({ title, subtitle, currentTab, onSelectTab }) => {
               <Ionicons
                 name={totalAlertsCount > 0 ? "notifications" : "notifications-outline"}
                 size={isSmall ? 17 : 18}
-                color={hasTomorrowAlarm ? "#ea580c" : (pendingCount > 0 ? "#ffffff" : THEME.colors.textMuted)}
+                color={hasTomorrowAlarm ? "#ea580c" : (totalAlertsCount > 0 ? "#ffffff" : THEME.colors.textMuted)}
               />
               {totalAlertsCount > 0 && (
                 <View style={[styles.badgeDot, hasTomorrowAlarm && styles.badgeDotAlarm]}>
@@ -128,7 +225,7 @@ export const Header = ({ title, subtitle, currentTab, onSelectTab }) => {
               )}
             </View>
             {!isMobile && (
-              <Text style={[styles.notifText, hasTomorrowAlarm ? styles.notifTextAlarm : (pendingCount > 0 && styles.notifTextActive)]}>
+              <Text style={[styles.notifText, hasTomorrowAlarm ? styles.notifTextAlarm : (totalAlertsCount > 0 && styles.notifTextActive)]}>
                 Notificaciones
               </Text>
             )}
@@ -154,9 +251,15 @@ export const Header = ({ title, subtitle, currentTab, onSelectTab }) => {
         tomorrowEvents={tomorrowEvents}
         todayEvents={todayEvents}
         pendingAttendances={pendingAttendances}
+        pendingAdvanceRequests={pendingAdvanceRequests}
+        pendingLeaveRequests={pendingLeaveRequests}
+        pendingJustifications={pendingJustifications}
         onValidateOne={(dateKey, empId) => validateAttendance(dateKey, empId)}
         onRejectOne={(dateKey, empId) => setEmployeeAttendance(dateKey, empId, null)}
         onValidateAll={handleValidateAll}
+        onResolveAdvance={handleResolveAdvance}
+        onResolveLeave={handleResolveLeave}
+        onResolveJustification={handleResolveJustification}
         onGoToAgenda={() => handleSelectSection('agenda')}
         onPlayAlarm={playAlarm}
       />

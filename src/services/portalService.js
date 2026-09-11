@@ -251,3 +251,73 @@ export const submitAttendanceJustification = async ({
 
   return newJustification;
 };
+
+/* =========================================================================
+   4. ACCIONES DE RESOLUCIÓN POR EL ADMINISTRADOR
+========================================================================= */
+
+/**
+ * Resolves an advance request (approves or rejects).
+ */
+export const resolveAdvanceRequest = async ({
+  requestId,
+  status, // 'approved' | 'rejected'
+  adminComment = '',
+}) => {
+  if (!requestId) throw new Error('ID de solicitud no especificado.');
+  const updateData = {
+    id: requestId,
+    status,
+    adminComment: adminComment.trim(),
+    resolvedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const ok = await saveEntityDoc('advance_requests', requestId, updateData);
+  if (!ok) throw new Error('No se pudo actualizar el estado del adelanto.');
+  return updateData;
+};
+
+/**
+ * Resolves a leave/permission request.
+ */
+export const resolveLeaveRequest = async ({
+  requestId,
+  status, // 'approved' | 'rejected'
+  adminFeedback = '',
+}) => {
+  if (!requestId) throw new Error('ID de solicitud no especificado.');
+  const updateData = {
+    id: requestId,
+    status,
+    adminFeedback: adminFeedback.trim(),
+    resolvedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const ok = await saveEntityDoc('leave_requests', requestId, updateData);
+  if (!ok) throw new Error('No se pudo actualizar la solicitud de reposo/permiso.');
+  return updateData;
+};
+
+/**
+ * Resolves an attendance justification.
+ */
+export const resolveAttendanceJustification = async ({
+  justificationId,
+  status, // 'approved' | 'rejected'
+  adminComment = '',
+}) => {
+  if (!justificationId) throw new Error('ID de justificación no especificado.');
+  const updateData = {
+    id: justificationId,
+    status,
+    adminComment: adminComment.trim(),
+    resolvedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const ok = await saveEntityDoc('attendance_justifications', justificationId, updateData);
+  if (!ok) throw new Error('No se pudo actualizar la justificación de asistencia.');
+  return updateData;
+};
