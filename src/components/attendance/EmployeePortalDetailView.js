@@ -11,8 +11,8 @@ import { PortalJustificationsSection } from './PortalJustificationsSection';
 const PORTAL_TABS = [
   { id: 'attendance', label: 'Asistencia', icon: 'time-outline', activeIcon: 'time' },
   { id: 'advances', label: 'Adelantos', icon: 'cash-outline', activeIcon: 'cash' },
-  { id: 'leave', label: 'Reposos/Permisos', icon: 'medkit-outline', activeIcon: 'medkit' },
-  { id: 'justifications', label: 'Justificaciones', icon: 'shield-checkmark-outline', activeIcon: 'shield-checkmark' },
+  { id: 'leave', label: 'Permisos', icon: 'medkit-outline', activeIcon: 'medkit' },
+  { id: 'justifications', label: 'Justificar', icon: 'shield-checkmark-outline', activeIcon: 'shield-checkmark' },
 ];
 
 export const EmployeePortalDetailView = ({
@@ -315,20 +315,27 @@ const styles = StyleSheet.create({
   /* Segmented Nav Tabs */
   tabsContainer: {
     backgroundColor: '#f1f5f9',
-    padding: 4,
+    padding: 3,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   tabsScroll: {
     flexDirection: 'row',
-    gap: 4,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 2,
   },
   tabBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
+    gap: 4,
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    paddingHorizontal: 6,
+    borderRadius: 7,
     backgroundColor: 'transparent',
   },
   tabBtnActive: {
@@ -341,7 +348,7 @@ const styles = StyleSheet.create({
   },
   tabBtnText: {
     color: '#475569',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   tabBtnTextActive: {
@@ -350,7 +357,7 @@ const styles = StyleSheet.create({
   },
   tabBadge: {
     backgroundColor: 'rgba(37, 99, 235, 0.15)',
-    paddingHorizontal: 5,
+    paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 9999,
   },
@@ -359,7 +366,7 @@ const styles = StyleSheet.create({
   },
   tabBadgeText: {
     color: THEME.colors.primary,
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '900',
   },
   tabBadgeTextActive: {

@@ -176,9 +176,9 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
       visible={visible}
       onClose={onClose}
       title={authenticatedEmployee ? `Mi Portal • ${authenticatedEmployee.portalUsername || authenticatedEmployee.name}` : "Acceso al Portal"}
-      maxWidth={480}
+      maxWidth={authenticatedEmployee ? 560 : 440}
       minHeight={authenticatedEmployee ? 580 : 380}
-      height={authenticatedEmployee ? (Platform.OS === 'web' ? '82vh' : 580) : null}
+      height={authenticatedEmployee ? (Platform.OS === 'web' ? '85vh' : 600) : null}
     >
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 16 }}>
         {!authenticatedEmployee ? (
