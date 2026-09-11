@@ -160,18 +160,33 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
             return (
               <View key={emp.id} style={[styles.rankRow, isTop1 && styles.rankRowTop1, isCurrentSelected && styles.rankRowSelected]}>
                 <View style={styles.medalBox}><Text style={styles.medalText}>{medal}</Text></View>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                    <TouchableOpacity onPress={() => handleSelectToDesignate(emp.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={styles.empName}>{emp.name} <Text style={styles.empArea}>({emp.area})</Text></Text>
-                      {isCurrentSelected && (
-                        <View style={styles.currentEomBadge}>
-                          <Ionicons name="ribbon" size={10} color="#b45309" />
-                          <Text style={styles.currentEomBadgeText}>Empleado del Mes</Text>
-                        </View>
-                      )}
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                    <TouchableOpacity onPress={() => handleSelectToDesignate(emp.id)} style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.empName}>{emp.name}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
+                        <Text style={styles.empArea}>{emp.area}</Text>
+                        {isCurrentSelected && (
+                          <View style={styles.currentEomBadge}>
+                            <Ionicons name="ribbon" size={10} color="#b45309" />
+                            <Text style={styles.currentEomBadgeText}>Empleado del Mes</Text>
+                          </View>
+                        )}
+                      </View>
                     </TouchableOpacity>
 
+                    <View style={styles.scoreBox}>
+                      <Text style={[styles.scoreVal, emp.score < 0 && styles.scoreValNegative]}>
+                        {emp.score} pts
+                      </Text>
+                      <Text style={styles.scoreLabel}>Puntuación</Text>
+                    </View>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, flexWrap: 'wrap', gap: 6 }}>
+                    <Text style={styles.empStats}>
+                      ✅ {emp.presentCount} asist. | 🎁 {formatCurrency(emp.totalBonuses)} | ⭐ {emp.customPoints || 0} pts
+                    </Text>
                     <TouchableOpacity
                       style={styles.quickDesignateBtn}
                       onPress={() => handleSelectToDesignate(emp.id)}
@@ -181,10 +196,6 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
                       <Text style={styles.quickDesignateBtnText}>Designar 🏆</Text>
                     </TouchableOpacity>
                   </View>
-
-                  <Text style={styles.empStats}>
-                    ✅ Asistencias: {emp.presentCount} | 🎁 Bonos: {formatCurrency(emp.totalBonuses)} | ⭐ Asignados: {emp.customPoints || 0} pts
-                  </Text>
 
                   {/* Quick points adjust controls */}
                   <View style={styles.pointsControlsRow}>
@@ -249,13 +260,6 @@ export const EmployeeRankModal = ({ visible, onClose, employees = [], attendance
                       </TouchableOpacity>
                     )}
                   </View>
-                </View>
-
-                <View style={styles.scoreBox}>
-                  <Text style={[styles.scoreVal, emp.score < 0 && styles.scoreValNegative]}>
-                    {emp.score} pts
-                  </Text>
-                  <Text style={styles.scoreLabel}>Puntuación</Text>
                 </View>
               </View>
             );
@@ -384,9 +388,19 @@ const styles = StyleSheet.create({
   },
   medalBox: { width: 34, alignItems: 'center' },
   medalText: { fontSize: 20, fontWeight: '900', color: THEME.colors.primary },
-  empName: { color: THEME.colors.textMain, fontSize: 13.5, fontWeight: '800' },
-  empArea: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '500' },
-  empStats: { color: THEME.colors.textMuted, fontSize: 11, marginTop: 3, fontWeight: '600' },
+  empName: { color: THEME.colors.textMain, fontSize: 14, fontWeight: '800', lineHeight: 18 },
+  empArea: {
+    color: '#475569',
+    fontSize: 10.5,
+    fontWeight: '700',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  empStats: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '600' },
   pointsControlsRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 7, flexWrap: 'wrap' },
   pointsActionLabel: { fontSize: 10.5, color: THEME.colors.textDim, fontWeight: '700' },
   pointQuickBtn: { backgroundColor: 'rgba(37, 99, 235, 0.12)', borderWidth: 1, borderColor: 'rgba(37, 99, 235, 0.25)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
@@ -398,7 +412,7 @@ const styles = StyleSheet.create({
   inlinePointCancelBtn: { width: 24, height: 24, borderRadius: 6, backgroundColor: '#f1f5f9', borderWidth: 1, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center' },
   editPointPencilBtn: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 6, backgroundColor: 'rgba(37, 99, 235, 0.08)' },
   editPointPencilText: { fontSize: 10.5, color: THEME.colors.primary, fontWeight: '800' },
-  scoreBox: { alignItems: 'flex-end', minWidth: 65 },
+  scoreBox: { alignItems: 'flex-end', minWidth: 60, paddingLeft: 6 },
   scoreVal: { color: THEME.colors.primary, fontSize: 16, fontWeight: '900', letterSpacing: -0.2 },
   scoreValNegative: { color: THEME.colors.danger },
   scoreLabel: { color: THEME.colors.textDim, fontSize: 9.5, fontWeight: '600' },
