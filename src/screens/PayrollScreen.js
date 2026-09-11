@@ -186,11 +186,11 @@ export const PayrollScreen = () => {
 
       <View style={styles.actionRowRight}>
         <PrimaryButton
-          title={`Confirmar Pago a Todos (${summaryData.rows.length} Empleados) • Fecha: ${paymentDate}`}
+          title={`Confirmar Pago (${summaryData.rows.length} Empleados) • ${paymentDate}`}
           icon="checkmark-done-circle"
           variant="success"
           onPress={handleConfirmAllPayroll}
-          small
+          style={{ width: '100%' }}
         />
       </View>
 
