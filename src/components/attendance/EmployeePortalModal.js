@@ -8,7 +8,16 @@ import { EmployeePortalAuthView } from './EmployeePortalAuthView';
 import { EmployeePortalDetailView } from './EmployeePortalDetailView';
 
 export const EmployeePortalModal = ({ visible, onClose }) => {
-  const { employees = [], updateEmployeePortalProfile, attendance = {}, notifySelfAttendance, payrollPayments = [] } = useApp() || {};
+  const {
+    employees = [],
+    updateEmployeePortalProfile,
+    attendance = {},
+    notifySelfAttendance,
+    payrollPayments = [],
+    advanceRequests = [],
+    leaveRequests = [],
+    attendanceJustifications = [],
+  } = useApp() || {};
   const activeEmployees = useMemo(
     () => (employees || []).filter((e) => e?.status !== 'inactive' && !e?.exemptAttendance && !e?.isOwner),
     [employees]
@@ -196,6 +205,10 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
             isPermission={isPermission}
             myPayments={myPayments}
             myMonthAttendance={myMonthAttendance}
+            attendance={attendance}
+            advanceRequests={advanceRequests}
+            leaveRequests={leaveRequests}
+            attendanceJustifications={attendanceJustifications}
             onNotifyAttendance={handleNotifyAttendance}
             onUpdateProfile={handleUpdateProfile}
             onLogout={handleLogoutEmp}

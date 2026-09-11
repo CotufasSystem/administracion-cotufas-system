@@ -24,6 +24,9 @@ export const AppProvider = ({ children }) => {
   const [themeMode, setThemeMode] = useState('light');
   const [projectRestaurants, setProjectRestaurants] = useState({});
   const [employeeOfMonth, setEmployeeOfMonth] = useState(null);
+  const [advanceRequests, setAdvanceRequests] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
+  const [attendanceJustifications, setAttendanceJustifications] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [masterPin, setMasterPin] = useState('123456');
@@ -56,6 +59,9 @@ export const AppProvider = ({ children }) => {
           if (cached.extra_incomes) setExtraIncomes(cached.extra_incomes);
           if (cached.agenda) setAgenda(cached.agenda);
           if (cached.negotiations) setNegotiations(cached.negotiations);
+          if (cached.advance_requests) setAdvanceRequests(cached.advance_requests);
+          if (cached.leave_requests) setLeaveRequests(cached.leave_requests);
+          if (cached.attendance_justifications) setAttendanceJustifications(cached.attendance_justifications);
         }
 
         const collections = [
@@ -67,6 +73,9 @@ export const AppProvider = ({ children }) => {
           { name: 'extra_incomes', set: setExtraIncomes },
           { name: 'agenda', set: setAgenda },
           { name: 'negotiations', set: setNegotiations },
+          { name: 'advance_requests', set: setAdvanceRequests },
+          { name: 'leave_requests', set: setLeaveRequests },
+          { name: 'attendance_justifications', set: setAttendanceJustifications },
         ];
 
         collections.forEach(({ name, set }) => {
@@ -312,6 +321,9 @@ export const AppProvider = ({ children }) => {
       resetProfileImage: () => { setProfileImage(null); saveSettingsToFirestore({ profileImage: null }); },
       themeMode, toggleThemeMode,
       employeeOfMonth, saveEmployeeOfMonth,
+      advanceRequests,
+      leaveRequests,
+      attendanceJustifications,
       isAuthenticated, login, logout, isLoaded, masterPin, updatePin, changeMasterPin: updatePin,
       exportDatabaseJson, importDatabaseJson,
     }}>
