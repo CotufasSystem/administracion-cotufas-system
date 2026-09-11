@@ -10,6 +10,7 @@ import { PortalJustificationsSection } from './PortalJustificationsSection';
 
 const PORTAL_TABS = [
   { id: 'attendance', label: 'Asistencia', icon: 'time-outline', activeIcon: 'time' },
+  { id: 'ranking', label: 'Rendimiento 🏆', icon: 'trophy-outline', activeIcon: 'trophy' },
   { id: 'advances', label: 'Adelantos', icon: 'cash-outline', activeIcon: 'cash' },
   { id: 'leave', label: 'Permisos', icon: 'medkit-outline', activeIcon: 'medkit' },
   { id: 'justifications', label: 'Justificar', icon: 'shield-checkmark-outline', activeIcon: 'shield-checkmark' },
@@ -17,6 +18,9 @@ const PORTAL_TABS = [
 
 export const EmployeePortalDetailView = ({
   employee,
+  employees = [],
+  employeeOfMonth,
+  payrollPayments = [],
   todayStr,
   todayRecord,
   isPending,
@@ -89,6 +93,40 @@ export const EmployeePortalDetailView = ({
 
   const latestResolution = recentResolutions[0];
 
+  // Calculate full rankings and employee points
+  const rankings = useMemo(() => {
+    return (employees || []).map((emp) => {
+      let presentCount = 0;
+      let lateCount = 0;
+      Object.keys(attendance || {}).forEach((dateKey) => {
+        const dayRec = attendance[dateKey]?.[emp.id];
+        const status = typeof dayRec === 'object' ? dayRec?.status : dayRec;
+        if (status === 'present') presentCount++;
+        else if (status === 'late') lateCount++;
+      });
+
+      const totalBonuses = (payrollPayments || []).filter(p => p.empId === emp.id).reduce((s, p) => s + (Number(p.bonus) || 0), 0);
+      const customPoints = Number(emp.customPoints) || 0;
+      const score = (presentCount * 10) + (totalBonuses * 2) - (lateCount * 5) + customPoints;
+
+      return {
+        ...emp,
+        presentCount,
+        lateCount,
+        totalBonuses,
+        customPoints,
+        score,
+      };
+    }).sort((a, b) => b.score - a.score);
+  }, [employees, attendance, payrollPayments]);
+
+  const myRankIndex = rankings.findIndex((r) => r.id === employee.id);
+  const myRankData = myRankIndex !== -1 ? rankings[myRankIndex] : null;
+  const myPosition = myRankIndex !== -1 ? myRankIndex + 1 : '-';
+
+  const isMeEOM = employeeOfMonth?.empId === employee.id;
+  const designatedEOM = employees.find((e) => e.id === employeeOfMonth?.empId);
+
   return (
     <View style={styles.container}>
       {/* Employee Identity Header Card */}
@@ -117,6 +155,33 @@ export const EmployeePortalDetailView = ({
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Empleado del Mes Spotlight Banner */}
+      {isMeEOM ? (
+        <View style={styles.eomMeBanner}>
+          <View style={styles.eomTrophyBox}>
+            <Text style={{ fontSize: 28 }}>🏆</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={styles.eomMeTitle}>¡FELICITACIONES, ERES EL EMPLEADO DEL MES!</Text>
+            </View>
+            <Text style={styles.eomMeSubtitle}>Mes: {employeeOfMonth?.monthYear || 'Actual'}</Text>
+            <Text style={styles.eomMeReason}>"{employeeOfMonth?.reason || 'Excelente desempeño, puntualidad y compromiso.'}"</Text>
+          </View>
+        </View>
+      ) : designatedEOM ? (
+        <View style={styles.eomGeneralBanner}>
+          <View style={styles.eomGeneralTrophy}>
+            <Text style={{ fontSize: 22 }}>🏆</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.eomGeneralHeader}>EMPLEADO DEL MES • {employeeOfMonth?.monthYear || 'Actual'}</Text>
+            <Text style={styles.eomGeneralName}>{designatedEOM.name} <Text style={{ fontSize: 11, fontWeight: '600', color: '#64748b' }}>({designatedEOM.area})</Text></Text>
+            <Text style={styles.eomGeneralReason}>"{employeeOfMonth?.reason || 'Reconocimiento al mayor compromiso y eficiencia en el equipo.'}"</Text>
+          </View>
+        </View>
+      ) : null}
 
       {/* Admin Resolution Notification Banner (e.g. Rejected or Approved) */}
       {latestResolution ? (
@@ -343,6 +408,107 @@ export const EmployeePortalDetailView = ({
         />
       )}
 
+      {/* Module: Rendimiento, Puntos y Ranking */}
+      {activeTab === 'ranking' && (
+        <View style={styles.rankingModuleContainer}>
+          {/* Mi Puntuación Actual Card */}
+          <View style={styles.myScoreCard}>
+            <View style={styles.myScoreHeader}>
+              <View>
+                <Text style={styles.myScoreBadge}>MI PUNTUACIÓN Y RENDIMIENTO</Text>
+                <Text style={styles.myScoreName}>{employee.name}</Text>
+                <Text style={styles.myScoreSub}>Posición actual en la tabla: <Text style={{ fontWeight: '900', color: THEME.colors.primary }}>#{myPosition}</Text></Text>
+              </View>
+              <View style={styles.myScoreBigBox}>
+                <Text style={[styles.myScoreBigVal, (myRankData?.score || 0) < 0 && { color: THEME.colors.danger }]}>
+                  {myRankData?.score || 0}
+                </Text>
+                <Text style={styles.myScoreBigLabel}>PUNTOS TOTALES</Text>
+              </View>
+            </View>
+
+            {/* Breakdown de Puntos */}
+            <View style={styles.scoreBreakdownGrid}>
+              <View style={styles.scoreBreakdownItem}>
+                <Text style={styles.scoreBreakdownVal}>+{((myRankData?.presentCount || 0) * 10)} pts</Text>
+                <Text style={styles.scoreBreakdownLabel}>✅ Asistencias ({myRankData?.presentCount || 0})</Text>
+              </View>
+              <View style={styles.scoreBreakdownItem}>
+                <Text style={styles.scoreBreakdownVal}>+{((myRankData?.totalBonuses || 0) * 2)} pts</Text>
+                <Text style={styles.scoreBreakdownLabel}>🎁 Bonos (${myRankData?.totalBonuses || 0})</Text>
+              </View>
+              <View style={styles.scoreBreakdownItem}>
+                <Text style={[styles.scoreBreakdownVal, (myRankData?.customPoints || 0) < 0 && { color: THEME.colors.danger }]}>
+                  {Number(myRankData?.customPoints) >= 0 ? `+${myRankData?.customPoints || 0}` : myRankData?.customPoints} pts
+                </Text>
+                <Text style={styles.scoreBreakdownLabel}>⭐ Asignados por Admin</Text>
+              </View>
+              <View style={styles.scoreBreakdownItem}>
+                <Text style={[styles.scoreBreakdownVal, { color: (myRankData?.lateCount || 0) > 0 ? THEME.colors.danger : THEME.colors.textDim }]}>
+                  -{((myRankData?.lateCount || 0) * 5)} pts
+                </Text>
+                <Text style={styles.scoreBreakdownLabel}>⏰ Tardanzas ({myRankData?.lateCount || 0})</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Tabla de Rendimiento General */}
+          <View style={styles.portalRankList}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+              <Text style={styles.portalRankTitle}>Tabla de Posiciones del Equipo</Text>
+              <Text style={{ fontSize: 9.5, color: THEME.colors.textDim }}>Actualizado en vivo</Text>
+            </View>
+
+            {rankings.map((emp, idx) => {
+              const isMe = emp.id === employee.id;
+              const isTop1 = idx === 0;
+              const isTop2 = idx === 1;
+              const isTop3 = idx === 2;
+              const medal = isTop1 ? '🥇' : isTop2 ? '🥈' : isTop3 ? '🥉' : `#${idx + 1}`;
+              const isEmpEOM = employeeOfMonth?.empId === emp.id;
+
+              return (
+                <View
+                  key={emp.id}
+                  style={[
+                    styles.portalRankRow,
+                    isMe && styles.portalRankRowMe,
+                    isTop1 && !isMe && styles.portalRankRowTop1,
+                  ]}
+                >
+                  <View style={styles.portalMedalBox}>
+                    <Text style={styles.portalMedalText}>{medal}</Text>
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <Text style={[styles.portalEmpName, isMe && { color: THEME.colors.primary, fontWeight: '900' }]}>
+                        {emp.name} {isMe ? '👤 (Tú)' : ''}
+                      </Text>
+                      {isEmpEOM && (
+                        <View style={styles.portalEomBadgeSmall}>
+                          <Ionicons name="ribbon" size={10} color="#b45309" />
+                          <Text style={styles.portalEomBadgeSmallText}>Empleado del Mes</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.portalEmpStats}>
+                      {emp.area || 'Operaciones'} • ✅ {emp.presentCount} asistencias • 🎁 ${emp.totalBonuses} bonos
+                    </Text>
+                  </View>
+
+                  <View style={styles.portalScoreBox}>
+                    <Text style={[styles.portalScoreVal, emp.score < 0 && { color: THEME.colors.danger }]}>
+                      {emp.score} pts
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
+
       {/* Module 2: Reposos Médicos y Permisos */}
       {activeTab === 'leave' && (
         <PortalLeaveSection
@@ -532,4 +698,239 @@ const styles = StyleSheet.create({
   paymentAmount: { color: THEME.colors.success, fontSize: 13, fontWeight: '900' },
   paymentBadge: { color: THEME.colors.textDim, fontSize: 9, fontWeight: '700', marginTop: 2 },
   emptyText: { color: THEME.colors.textDim, fontSize: 11, fontStyle: 'italic', textAlign: 'center', paddingVertical: 12 },
+
+  /* Empleado del Mes Banners in Portal */
+  eomMeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#fef3c7',
+    borderWidth: 1.5,
+    borderColor: '#f59e0b',
+    borderRadius: THEME.radius.md,
+    padding: 12,
+    shadowColor: '#f59e0b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  eomTrophyBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f59e0b',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eomMeTitle: {
+    color: '#92400e',
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 0.4,
+  },
+  eomMeSubtitle: {
+    color: '#b45309',
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 1,
+  },
+  eomMeReason: {
+    color: '#78350f',
+    fontSize: 11,
+    fontStyle: 'italic',
+    marginTop: 3,
+  },
+  eomGeneralBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#fffbeb',
+    borderWidth: 1,
+    borderColor: '#fde68a',
+    borderRadius: THEME.radius.md,
+    padding: 12,
+  },
+  eomGeneralTrophy: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fef3c7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#fde68a',
+  },
+  eomGeneralHeader: {
+    color: '#b45309',
+    fontSize: 9.5,
+    fontWeight: '900',
+    letterSpacing: 0.6,
+  },
+  eomGeneralName: {
+    color: '#0f172a',
+    fontSize: 13.5,
+    fontWeight: '900',
+    marginTop: 1,
+  },
+  eomGeneralReason: {
+    color: '#475569',
+    fontSize: 11,
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
+
+  /* Ranking Module Styles */
+  rankingModuleContainer: { gap: 12 },
+  myScoreCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: THEME.radius.md,
+    borderWidth: 1.5,
+    borderColor: 'rgba(37, 99, 235, 0.22)',
+    padding: 14,
+    gap: 12,
+  },
+  myScoreHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  myScoreBadge: {
+    color: THEME.colors.primary,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  myScoreName: {
+    color: THEME.colors.textMain,
+    fontSize: 16,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  myScoreSub: {
+    color: THEME.colors.textDim,
+    fontSize: 11.5,
+    marginTop: 2,
+  },
+  myScoreBigBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.25)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 90,
+  },
+  myScoreBigVal: {
+    color: THEME.colors.primary,
+    fontSize: 22,
+    fontWeight: '900',
+  },
+  myScoreBigLabel: {
+    color: THEME.colors.primaryDark,
+    fontSize: 8.5,
+    fontWeight: '800',
+  },
+  scoreBreakdownGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    backgroundColor: '#f8fafc',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  scoreBreakdownItem: {
+    flex: 1,
+    minWidth: 115,
+    padding: 4,
+  },
+  scoreBreakdownVal: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: THEME.colors.textMain,
+  },
+  scoreBreakdownLabel: {
+    fontSize: 10,
+    color: THEME.colors.textDim,
+    fontWeight: '600',
+    marginTop: 1,
+  },
+  portalRankList: {
+    gap: 6,
+  },
+  portalRankTitle: {
+    color: THEME.colors.textDim,
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  portalRankRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#ffffff',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  portalRankRowMe: {
+    backgroundColor: '#eff6ff',
+    borderColor: THEME.colors.primary,
+  },
+  portalRankRowTop1: {
+    backgroundColor: '#fffdf5',
+    borderColor: '#fde68a',
+  },
+  portalMedalBox: {
+    width: 28,
+    alignItems: 'center',
+  },
+  portalMedalText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: THEME.colors.primary,
+  },
+  portalEmpName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: THEME.colors.textMain,
+  },
+  portalEmpStats: {
+    fontSize: 10.5,
+    color: THEME.colors.textDim,
+    marginTop: 2,
+  },
+  portalScoreBox: {
+    alignItems: 'flex-end',
+    minWidth: 55,
+  },
+  portalScoreVal: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: THEME.colors.primary,
+  },
+  portalEomBadgeSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: '#fef3c7',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#fde68a',
+  },
+  portalEomBadgeSmallText: {
+    color: '#b45309',
+    fontSize: 9,
+    fontWeight: '800',
+  },
 });

@@ -17,6 +17,7 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
     advanceRequests = [],
     leaveRequests = [],
     attendanceJustifications = [],
+    employeeOfMonth,
   } = useApp() || {};
   const activeEmployees = useMemo(
     () => (employees || []).filter((e) => e?.status !== 'inactive' && !e?.exemptAttendance && !e?.isOwner),
@@ -197,6 +198,9 @@ export const EmployeePortalModal = ({ visible, onClose }) => {
         ) : (
           <EmployeePortalDetailView
             employee={authenticatedEmployee}
+            employees={employees}
+            employeeOfMonth={employeeOfMonth}
+            payrollPayments={payrollPayments}
             todayStr={todayStr}
             todayRecord={todayRecord}
             isPending={isPending}
