@@ -214,12 +214,35 @@ export const AppProvider = ({ children }) => {
     saveEmployee({ ...emp, advances: cur + num, advancesHistory: [rec, ...hist] });
   };
 
+  const deleteAdvanceEntry = (empId, entryId) => {
+    const emp = employees.find(e => e.id === empId);
+    if (!emp) return;
+    const hist = Array.isArray(emp.advancesHistory) ? emp.advancesHistory : [];
+    const target = hist.find(h => h.id === entryId);
+    const updatedHist = hist.filter(h => h.id !== entryId);
+    const deductAmount = target ? Number(target.amount) || 0 : 0;
+    const cur = Number(emp.advances) || 0;
+    const next = Math.max(0, cur - deductAmount);
+    saveEmployee({ ...emp, advances: next, advancesHistory: updatedHist });
+  };
+
+  const setAdvance = (empId, amount = 0) => {
+    const emp = employees.find(e => e.id === empId);
+    if (!emp) return;
+    const num = Number(amount) || 0;
+    saveEmployee({ ...emp, advances: num, advancesHistory: num === 0 ? [] : (emp.advancesHistory || []) });
+  };
+
   const clearOrApplyAdvances = (empId, amountToDeduct = null) => {
     const emp = employees.find(e => e.id === empId);
     if (!emp) return;
     const cur = Number(emp.advances) || 0;
     const next = amountToDeduct !== null ? Math.max(0, cur - Number(amountToDeduct)) : 0;
-    saveEmployee({ ...emp, advances: next });
+    saveEmployee({
+      ...emp,
+      advances: next,
+      advancesHistory: next === 0 ? [] : (emp.advancesHistory || []),
+    });
   };
 
   const recordPayrollPayment = (pay) => saveItem('payroll', pay, setPayrollPayments);
@@ -308,7 +331,7 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      employees, saveEmployee, updateEmployeePortalProfile, deleteEmployee, addAdvance, clearOrApplyAdvances,
+      employees, saveEmployee, updateEmployeePortalProfile, deleteEmployee, addAdvance, clearOrApplyAdvances, deleteAdvanceEntry, setAdvance,
       projects, saveProject, deleteProject, projectRestaurants, saveProjectRestaurant, deleteProjectRestaurant,
       attendance, setEmployeeAttendance, markAllAttendance, markGroupAttendance, notifySelfAttendance, validateAttendance, validateAllPendingAttendance,
       payrollPayments, recordPayrollPayment, deletePayrollPayment,

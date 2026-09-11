@@ -9,7 +9,7 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import { useApp } from '../context/AppContext';
 
 export const AdvancesScreen = () => {
-  const { employees, addAdvance, clearOrApplyAdvances } = useApp();
+  const { employees, addAdvance, clearOrApplyAdvances, deleteAdvanceEntry } = useApp();
   const [filter, setFilter] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [clearingEmp, setClearingEmp] = useState(null);
@@ -88,6 +88,14 @@ export const AdvancesScreen = () => {
                       <Text style={styles.entryDate}>📅 {formatDate(h.date)}</Text>
                       <Text style={styles.entryAmount}>+{formatCurrency(h.amount)}</Text>
                       {h.note ? <Text style={styles.entryNote} numberOfLines={1}>({h.note})</Text> : null}
+                      <TouchableOpacity
+                        onPress={() => deleteAdvanceEntry(emp.id, h.id)}
+                        style={styles.entryDeleteBtn}
+                        activeOpacity={0.7}
+                        title="Eliminar este adelanto"
+                      >
+                        <Ionicons name="trash-outline" size={13} color={THEME.colors.danger} />
+                      </TouchableOpacity>
                     </View>
                   ))}
                 </View>
@@ -158,6 +166,7 @@ const styles = StyleSheet.create({
   entryDate: { color: THEME.colors.textMuted, fontSize: 11, fontWeight: '600' },
   entryAmount: { color: THEME.colors.warning, fontSize: 12, fontWeight: '800' },
   entryNote: { color: THEME.colors.textDim, fontSize: 11, fontStyle: 'italic', flex: 1 },
+  entryDeleteBtn: { padding: 4, borderRadius: 4 },
   actionsRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, borderTopWidth: 1, borderTopColor: 'rgba(37, 99, 235, 0.15)', paddingTop: 6 },
   btnAction: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: THEME.radius.sm, borderWidth: 1 },
   btnManage: { backgroundColor: '#ffffff', borderColor: 'rgba(37, 99, 235, 0.2)' },
