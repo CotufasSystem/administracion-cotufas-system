@@ -115,7 +115,7 @@ export const PortalJustificationsSection = ({ employee, attendance = {}, attenda
       {/* Pending Incidents List */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <View>
+          <View style={styles.cardTitleBox}>
             <Text style={styles.cardTitle}>Inasistencias & Tardanzas Detectadas</Text>
             <Text style={styles.cardSub}>Fechas registradas que requieren tu justificación</Text>
           </View>
@@ -304,11 +304,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(37, 99, 235, 0.18)',
     gap: 10,
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 },
+  cardTitleBox: { flex: 1, minWidth: 160 },
   cardTitle: { color: THEME.colors.textMain, fontSize: 13.5, fontWeight: '800' },
   cardSub: { color: THEME.colors.textMuted, fontSize: 11, marginTop: 1 },
   cardSubCount: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '600' },
-  badgePill: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, borderWidth: 1 },
+  badgePill: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, borderWidth: 1 },
   badgePillWarning: { backgroundColor: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)' },
   badgePillSuccess: { backgroundColor: 'rgba(22, 163, 74, 0.1)', borderColor: 'rgba(22, 163, 74, 0.3)' },
   badgePillText: { fontSize: 10.5, fontWeight: '800' },

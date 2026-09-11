@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
     gap: 10,
   },
-  historyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  historyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   historyTitle: { color: THEME.colors.textMain, fontSize: 13, fontWeight: '800' },
   historyCount: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '600' },
   requestItem: {
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
     gap: 6,
   },
-  requestItemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  requestItemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 6 },
   requestTypeLabel: { fontSize: 13, fontWeight: '800' },
   requestDates: { color: THEME.colors.textDim, fontSize: 11, marginTop: 1 },
   badgeContainer: {

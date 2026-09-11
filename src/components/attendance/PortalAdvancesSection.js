@@ -258,10 +258,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(37, 99, 235, 0.18)',
     gap: 12,
   },
-  capacityHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  capacityHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 },
   capacitySub: { color: THEME.colors.textMuted, fontSize: 10, fontWeight: '700', textTransform: 'uppercase' },
   capacityAmount: { color: THEME.colors.primaryDark, fontSize: 20, fontWeight: '900', marginTop: 2 },
-  baseSalaryBadge: { backgroundColor: 'rgba(37, 99, 235, 0.08)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  baseSalaryBadge: { alignSelf: 'flex-start', backgroundColor: 'rgba(37, 99, 235, 0.08)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
   baseSalaryText: { color: THEME.colors.primary, fontSize: 11, fontWeight: '700' },
   pendingNotice: {
     flexDirection: 'row',
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
     gap: 10,
   },
-  historyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  historyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   historyTitle: { color: THEME.colors.textMain, fontSize: 13, fontWeight: '800' },
   historyCount: { color: THEME.colors.textDim, fontSize: 11, fontWeight: '600' },
   requestItem: {
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
     gap: 6,
   },
-  requestItemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  requestItemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 6 },
   requestAmount: { color: THEME.colors.textMain, fontSize: 14, fontWeight: '900' },
   requestDate: { color: THEME.colors.textDim, fontSize: 10.5, marginTop: 1 },
   badgeContainer: {
